@@ -62,6 +62,13 @@ describe("deterministic gate — fabrications are blocked", () => {
     expect(blocks(kit).filter((i) => i.check === "term")).toEqual([]);
   });
 
+  it("allows the recipient's name and role when supplied by the user, and blocks them when not", () => {
+    const kit = { ...good, cover_letter: good.cover_letter.replace("Hiring team,", "Hi Paul,") + "\n\nThanks for reading, Paul." };
+    expect(blocks(kit).some((i) => i.detail.includes("'Paul'"))).toBe(true);
+    const withRecipient = deterministicGate(profile, kit, posting, { allowTerms: ["Paul", "Engineering Manager"] }).filter((i) => i.level === "block");
+    expect(withRecipient).toEqual([]);
+  });
+
   it("blocks a cv_change whose path does not exist", () => {
     const kit = { ...good, cv_changes: [{ ...good.cv_changes[0]!, path: "experience[7].bullets[0]" }] };
     expect(blocks(kit).some((i) => i.check === "path")).toBe(true);

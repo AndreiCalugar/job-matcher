@@ -48,7 +48,9 @@ export async function generateKitForJob(
     const gen = await generateKit(getClient(), profileEdit, jobForMatch, match, input.recipient, input.angle);
     await meter("kit_generated", jobId, gen.model, gen.usage);
 
-    const det = deterministicGate(profileEdit, gen.kit, job.raw.text);
+    const det = deterministicGate(profileEdit, gen.kit, job.raw.text, {
+      allowTerms: [input.recipient?.name, input.recipient?.role].filter((t): t is string => !!t),
+    });
     let verifierIssues: Issue[] = [];
     let verifierModel: string | null = null;
     if (gatePassed(det)) {

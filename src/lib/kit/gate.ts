@@ -9,11 +9,18 @@ import type { KitParse } from "@/lib/kit/schema";
 
 export type Issue = { check: string; where: string; detail: string; level: "block" | "warn" };
 
-export function deterministicGate(profile: ProfileEdit, kit: KitParse, postingText: string): Issue[] {
+export function deterministicGate(
+  profile: ProfileEdit,
+  kit: KitParse,
+  postingText: string,
+  // Text the user supplied themselves (recipient name/role, their own
+  // name). Allowed in generated prose; it is not a claim about the CV.
+  opts: { allowTerms?: string[] } = {},
+): Issue[] {
   const issues: Issue[] = [];
   const profCorpus = profileCorpus(profile);
   const profTokens = tokenSet(profCorpus);
-  const postTokens = tokenSet(postingText);
+  const postTokens = tokenSet(`${postingText}\n${(opts.allowTerms ?? []).join("\n")}`);
   const profNumbers = numberSet(profCorpus);
   const postNumbers = numberSet(postingText);
 
