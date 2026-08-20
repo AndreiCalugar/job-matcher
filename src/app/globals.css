@@ -1,0 +1,243 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* next-themes sets class="dark" on <html>; this makes Tailwind's `dark:`
+   variant follow that class instead of the OS media query. */
+@custom-variant dark (&:is(.dark *));
+
+/* ==========================================================================
+   1. Primitive tokens — straight from DESIGN.md §2.
+   These are the only places a hex value appears in the app.
+   ========================================================================== */
+:root {
+  /* chrome (monochrome) */
+  --paper:          #EEF1F0;
+  --surface:        #F7F9F8;
+  --surface-sunken: #E4E8E7;
+  --ink:            #14181A;
+  --graphite:       #5A6467;
+  --rule:           #D3D9D7;
+  --rule-strong:    #B6BFBC;
+
+  /* data — the only chroma in the product */
+  --band-strong:    #0B5D4E;
+  --band-stretch:   #9A6B10;
+  --band-weak:      #6E7A80;
+  --band-mismatch:  #A6AFB2;
+
+  /* reserved signals */
+  --signal-ghosted:     #8E4B2E;
+  --signal-destructive: #A32C21;
+
+  /* shape — DESIGN.md §4 */
+  --radius-sm: 2px;
+  --radius:    4px;
+  --radius-lg: 6px;
+  --shadow-float: 0 8px 24px -8px rgb(20 24 26 / 0.18);
+
+  /* motion — DESIGN.md §8 */
+  --dur-fast:  120ms;
+  --dur-panel: 200ms;
+  --dur-sweep: 240ms;
+  --ease:      cubic-bezier(0.2, 0, 0, 1);
+}
+
+.dark {
+  --paper:          #101416;
+  --surface:        #171C1F;
+  --surface-sunken: #0B0E10;
+  --ink:            #E8EDEB;
+  --graphite:       #8A9598;
+  --rule:           #252C30;
+  --rule-strong:    #394347;
+
+  --band-strong:    #3FA98F;
+  --band-stretch:   #D2A03A;
+  --band-weak:      #78868C;
+  --band-mismatch:  #4A5459;
+
+  --signal-ghosted:     #C77A55;
+  --signal-destructive: #E0655A;
+}
+
+/* ==========================================================================
+   2. shadcn semantic tokens, aliased onto the primitives.
+   shadcn components read --background, --primary, --border ...; pointing
+   those at DESIGN.md tokens means every generated component is on-system
+   without per-component overrides. No new colours are introduced here.
+   ========================================================================== */
+:root,
+.dark {
+  --background:           var(--paper);
+  --foreground:           var(--ink);
+  --card:                 var(--surface);
+  --card-foreground:      var(--ink);
+  --popover:              var(--surface);
+  --popover-foreground:   var(--ink);
+  --primary:              var(--ink);
+  --primary-foreground:   var(--paper);
+  --secondary:            var(--surface-sunken);
+  --secondary-foreground: var(--ink);
+  --muted:                var(--surface-sunken);
+  --muted-foreground:     var(--graphite);
+  --accent:               var(--surface);
+  --accent-foreground:    var(--ink);
+  --destructive:          var(--signal-destructive);
+  --border:               var(--rule);
+  --input:                var(--rule);
+  --ring:                 var(--ink);
+  /* Charts are score-band coloured only. chart-5 is intentionally graphite:
+     a fifth series is chrome, not data. */
+  --chart-1: var(--band-strong);
+  --chart-2: var(--band-stretch);
+  --chart-3: var(--band-weak);
+  --chart-4: var(--band-mismatch);
+  --chart-5: var(--graphite);
+  --sidebar:                    var(--surface);
+  --sidebar-foreground:         var(--ink);
+  --sidebar-primary:            var(--ink);
+  --sidebar-primary-foreground: var(--paper);
+  --sidebar-accent:             var(--surface-sunken);
+  --sidebar-accent-foreground:  var(--ink);
+  --sidebar-border:             var(--rule);
+  --sidebar-ring:               var(--ink);
+}
+
+/* ==========================================================================
+   3. Tailwind theme. Exposes tokens as utilities (bg-paper, text-graphite,
+   border-rule, font-display, rounded-lg ...). `inline` keeps the var()
+   reference so dark mode swaps without regenerating utilities.
+   ========================================================================== */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* DESIGN.md names, usable directly */
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-ink: var(--ink);
+  --color-graphite: var(--graphite);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-band-strong: var(--band-strong);
+  --color-band-stretch: var(--band-stretch);
+  --color-band-weak: var(--band-weak);
+  --color-band-mismatch: var(--band-mismatch);
+  --color-signal-ghosted: var(--signal-ghosted);
+  --color-signal-destructive: var(--signal-destructive);
+
+  /* Fonts — variables injected by next/font in layout.tsx. DESIGN.md §3.
+     The fallback stacks only matter if the font request fails. */
+  --font-display: var(--font-archivo), "Archivo", system-ui, sans-serif;
+  --font-sans:    var(--font-inter-tight), "Inter Tight", system-ui, sans-serif;
+  --font-mono:    var(--font-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
+  --font-heading: var(--font-display);
+
+  /* Type scale — DESIGN.md §3. Each step carries its line-height. */
+  --text-display: 32px; --text-display--line-height: 36px;
+  --text-h1: 24px;      --text-h1--line-height: 30px;
+  --text-h2: 20px;      --text-h2--line-height: 26px;
+  --text-h3: 16px;      --text-h3--line-height: 22px;
+  --text-body: 14px;    --text-body--line-height: 21px;
+  --text-small: 13px;   --text-small--line-height: 19px;
+  --text-micro: 11px;   --text-micro--line-height: 14px;
+
+  /* Radius — overrides shadcn's calc() ladder with the three fixed stops.
+     Anything larger is deliberately undefined so it cannot be used. */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: initial;
+  --radius-2xl: initial;
+  --radius-3xl: initial;
+  --radius-4xl: initial;
+
+  --shadow-float: var(--shadow-float);
+
+  /* Spacing — 4px base, DESIGN.md §5. Tailwind v4 derives spacing-N from
+     this, so p-4 = 16px, gap-2 = 8px, etc. */
+  --spacing: 4px;
+
+  /* Breakpoints — DESIGN.md §5 */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 1024px;
+  --breakpoint-lg: 1280px;
+  --breakpoint-xl: initial;
+  --breakpoint-2xl: initial;
+  --container-content: 1440px;
+
+  --ease-system: var(--ease);
+}
+
+/* ==========================================================================
+   4. Base styles.
+   ========================================================================== */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans text-body antialiased;
+    /* DESIGN.md §3: every numeral tabular. Set once at the root; inherited. */
+    font-variant-numeric: tabular-nums;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  /* Display family carries a width axis; "Archivo Expanded" is Archivo at
+     wdth 125. Only applied at h2 (20px) and above — below that the width
+     does not read (DESIGN.md §3). */
+  .font-display {
+    font-stretch: 125%;
+    letter-spacing: -0.01em;
+  }
+  /* Eyebrow / field-name style — DESIGN.md §3 "micro". */
+  .eyebrow {
+    @apply font-mono text-micro uppercase text-graphite;
+    letter-spacing: 0.08em;
+  }
+  /* Focus ring per DESIGN.md §4: 2px ink, 2px offset, never removed. */
+  :where(button, [role="button"], a, input, textarea, select):focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  /* DESIGN.md §8: nothing moves unless the user caused it, and nothing moves
+     at all for users who asked for reduced motion. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0ms !important;
+      animation-duration: 0ms !important;
+    }
+  }
+}

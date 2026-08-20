@@ -1,6 +1,33 @@
+# --- secrets and personal data (must precede first commit; see CLAUDE.md) ---
 .env*
+!.env.example
 /data
 /private
 *.pdf
-node_modules
-.next
+*.docx
+
+# --- dependencies ---
+/node_modules
+/.pnp
+.pnp.*
+
+# --- next.js ---
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+
+# --- supabase local ---
+/supabase/.branches
+/supabase/.temp
+
+# --- misc ---
+.DS_Store
+*.pem
+npm-debug.log*
+/coverage
+.vercel
+
+# session log, kept local by choice
+BUILDLOG.md
