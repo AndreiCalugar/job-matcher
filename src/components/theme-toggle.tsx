@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 // Three-state segmented control: system / light / dark. Text only, mono,
 // monochrome (DESIGN.md §1: chrome carries no colour). Renders nothing
@@ -10,8 +10,8 @@ const OPTIONS = ["system", "light", "dark"] as const;
 
 export function ThemeToggle({ className = "" }: { className?: string }) {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  // false during SSR/hydration, true once on the client — without an effect.
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
   if (!mounted) return <span className={`inline-block h-7 w-[148px] ${className}`} aria-hidden />;
   return (
     <div role="radiogroup" aria-label="Theme" className={`inline-flex h-7 items-center rounded-md border border-rule bg-surface p-0.5 ${className}`}>
