@@ -13,6 +13,9 @@ import { formatDate } from "@/lib/jobs/format";
 export function KitView({ kit, jobId, applyUrl }: { kit: KitRow; jobId: string; applyUrl: string | null }) {
   const accepted = kit.cv_changes.filter((c) => c.accepted === true).length;
   const decided = kit.cv_changes.filter((c) => c.accepted != null).length;
+  const warnings = [...kit.gate_report.deterministic, ...kit.gate_report.verifier].filter((i) => i.level === "warn");
+  const warningsFor = (where: string) => warnings.filter((w) => w.where === where);
+  const proseWarnings = warnings.filter((w) => w.where.startsWith("sentence") || w.where === "cover_letter" || w.where === "outreach_body");
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-wrap items-center gap-2 font-mono text-micro text-graphite">
@@ -21,7 +24,8 @@ export function KitView({ kit, jobId, applyUrl }: { kit: KitRow; jobId: string; 
         {kit.edited_by_user ? <Badge>edited</Badge> : null}
         {kit.sent_at ? <Badge>sent {formatDate(kit.sent_at)}</Badge> : null}
         <span>
-          {kit.prompt_version} · {kit.model_version} · {formatDate(kit.generated_at)} · gate passed ({kit.claims.length} claims traced)
+          {kit.prompt_version} · {kit.model_version} · {formatDate(kit.generated_at)} · {kit.claims.length} claims traced
+          {warnings.length ? ` · ${warnings.length} to check` : " · no warnings"}
         </span>
       </div>
 
@@ -48,6 +52,11 @@ export function KitView({ kit, jobId, applyUrl }: { kit: KitRow; jobId: string; 
                 ) : null}
                 <p className="text-body text-ink">{c.suggested}</p>
                 <p className="mt-1 text-small text-graphite">{c.reason}</p>
+                {warningsFor(`cv_changes[${i}]`).map((w, k) => (
+                  <p key={k} className="mt-1 text-small text-ink">
+                    <span className="eyebrow">Check</span> {w.detail}
+                  </p>
+                ))}
               </div>
               <div className="flex items-start gap-1">
                 {([true, false] as const).map((v) => (
@@ -76,6 +85,16 @@ export function KitView({ kit, jobId, applyUrl }: { kit: KitRow; jobId: string; 
             <CopyButton text={kit.cover_letter} />
           </div>
           <Textarea name="cover_letter" defaultValue={kit.cover_letter} rows={14} className="max-w-[72ch] font-sans text-body" />
+          {proseWarnings.length ? (
+            <div className="mt-2 max-w-[72ch] rounded-lg border border-rule bg-surface p-3">
+              <p className="eyebrow mb-1">Check these against your CV before sending</p>
+              <ul className="text-small text-ink">
+                {proseWarnings.map((w, k) => (
+                  <li key={k} className="mt-1">{w.detail}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </section>
         {kit.outreach_body ? (
           <section>

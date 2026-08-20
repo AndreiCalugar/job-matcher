@@ -17,6 +17,7 @@ const posting = readFileSync(here("../parse/__fixtures__/posting-001.txt"), "utf
 const good: KitParse = kitParse.parse(JSON.parse(readFileSync(here("__fixtures__/kit-001.expected.json"), "utf8")));
 
 const blocks = (kit: KitParse) => deterministicGate(profile, kit, posting).filter((i) => i.level === "block");
+const warns = (kit: KitParse) => deterministicGate(profile, kit, posting).filter((i) => i.level === "warn");
 
 describe("paths", () => {
   it("resolves nested paths and rejects bad ones without throwing", () => {
@@ -79,13 +80,14 @@ describe("deterministic gate — fabrications are blocked", () => {
     expect(blocks(kit).some((i) => i.check === "current")).toBe(true);
   });
 
-  it("blocks a rephrase that strengthens 'helped' into 'led'", () => {
+  it("warns (does not block) on a rephrase that strengthens into 'led'", () => {
     const kit = {
       ...good,
       cv_changes: [{ path: "experience[1].bullets[1]", current: "Built a Shopify integration in Node.js for an e-commerce client.", suggested: "Led the Shopify integration programme in Node.js for an e-commerce client.", reason: "x", severity: "polish" as const }],
     };
-    // "Led" is at sentence start, so the number/term checks ignore it; the strengthener check must catch it.
-    expect(blocks(kit).some((i) => i.check === "strengthen" && i.detail.includes("led"))).toBe(true);
+    // "Led" is at sentence start, so the number/term checks ignore it; the strengthener check must flag it — as a warning.
+    expect(warns(kit).some((i) => i.check === "strengthen" && i.detail.includes("'led'"))).toBe(true);
+    expect(blocks(kit)).toEqual([]);
   });
 
   it("allows a strengthening verb that the profile itself uses", () => {
@@ -94,15 +96,23 @@ describe("deterministic gate — fabrications are blocked", () => {
       ...good,
       cv_changes: [{ path: "experience[0].bullets[0]", current: "Led the rebuild of the merchant onboarding flow in Next.js and TypeScript, cutting drop-off by 18%.", suggested: "Led the Next.js/TypeScript rebuild of the merchant onboarding flow, cutting drop-off by 18%.", reason: "x", severity: "polish" as const }],
     };
-    expect(blocks(kit).filter((i) => i.check === "strengthen")).toEqual([]);
+    expect(warns(kit).filter((i) => i.check === "strengthen")).toEqual([]);
+  });
+
+  it("treats a verb and its noun as the same root: 'architected' is fine when the CV says 'architecture'", () => {
+    const kit = { ...good, cv_changes: [{ path: "summary", current: profile.summary!, suggested: profile.summary + " Architected the dashboard.", reason: "x", severity: "polish" as const }] };
+    const withNoun = { ...profile, summary: profile.summary + " Strong in system architecture." };
+    expect(deterministicGate(withNoun, kit, posting).filter((i) => i.check === "strengthen")).toEqual([]);
+    expect(warns(kit).some((i) => i.check === "strengthen")).toBe(true);
   });
 
   it("lets the summary surface a verb that a role bullet already uses, but still blocks one used nowhere", () => {
     // "Led" exists in experience[0].bullets[0]; the summary may say it.
     const ok = { ...good, cv_changes: [{ path: "summary", current: profile.summary!, suggested: profile.summary + " Led the rebuild of a merchant onboarding flow.", reason: "x", severity: "polish" as const }] };
-    expect(blocks(ok).filter((i) => i.check === "strengthen")).toEqual([]);
+    expect(warns(ok).filter((i) => i.check === "strengthen")).toEqual([]);
     const bad = { ...good, cv_changes: [{ path: "summary", current: profile.summary!, suggested: profile.summary + " Spearheaded the platform.", reason: "x", severity: "polish" as const }] };
-    expect(blocks(bad).some((i) => i.check === "strengthen" && i.detail.includes("spearheaded"))).toBe(true);
+    expect(warns(bad).some((i) => i.check === "strengthen" && i.detail.includes("'spearheaded'"))).toBe(true);
+    expect(blocks(bad)).toEqual([]);
   });
 
   it("blocks a claim whose source_path is invented", () => {

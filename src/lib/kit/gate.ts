@@ -3,9 +3,17 @@ import { profileCorpus, resolvePath } from "@/lib/kit/paths";
 import type { KitParse } from "@/lib/kit/schema";
 
 // Anti-fabrication gate, layer 1: deterministic. Runs on every generated
-// kit before anything is stored. Any `block` issue → the kit is rejected
-// and recorded in blocked_generation. These checks are narrow on purpose:
-// each one catches a specific way a model invents.
+// kit before anything is stored.
+//
+// Two levels, decided by precision on real usage (BUILDLOG session 005):
+// - `block`: a fact that cannot be true to the profile — a number,
+//   technology, employer or percentage found nowhere in profile ∪ posting,
+//   a CV path that does not exist, a misquoted `current`, a claim with no
+//   source. These have had no false positives. The kit is discarded.
+// - `warn`: a judgement call — a stronger verb than the CV uses. The kit
+//   is stored and the warning is shown on the affected change for the
+//   user to accept or reject. The first three live kits were all blocked
+//   by this check alone, twice wrongly; that is the wrong trade.
 
 export type Issue = { check: string; where: string; detail: string; level: "block" | "warn" };
 
@@ -51,8 +59,10 @@ export function deterministicGate(
     const parent = aggregate ? profCorpus : parentEntry(profile, c.path);
     for (const verb of STRENGTHENERS) {
       const re = new RegExp(`\\b${verb}\\b`, "i");
-      if (re.test(c.suggested) && !re.test(c.current) && !re.test(scope) && !re.test(parent)) {
-        issues.push({ check: "strengthen", where, detail: `'${verb}' introduced by the suggestion; not in the profile entry at '${c.path}'`, level: "block" });
+      const stem = verb.replace(/(ed|ing)$/i, "");
+      const root = new RegExp(`\\b${stem.length >= 4 ? stem : verb}`, "i"); // architected ~ architecture; "led" stays exact
+      if (re.test(c.suggested) && !re.test(c.current) && !root.test(scope) && !root.test(parent)) {
+        issues.push({ check: "strengthen", where, detail: `'${verb}' is stronger than the wording in your CV at '${c.path}' — check it before accepting`, level: "warn" });
       }
     }
   });

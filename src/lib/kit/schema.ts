@@ -54,7 +54,10 @@ export const kitRow = z.object({
   channel: z.enum(["email", "linkedin", "form", "other"]).nullable(),
   angle,
   claims: z.array(claim),
-  gate_report: z.unknown(),
+  gate_report: z.object({
+    deterministic: z.array(z.object({ check: z.string(), where: z.string(), detail: z.string(), level: z.enum(["block", "warn"]) })).default([]),
+    verifier: z.array(z.object({ check: z.string(), where: z.string(), detail: z.string(), level: z.enum(["block", "warn"]) })).default([]),
+  }).passthrough(),
   version: z.number(),
   edited_by_user: z.boolean(),
   final_sent_body: z.string().nullable(),

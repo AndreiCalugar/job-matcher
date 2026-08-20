@@ -54,7 +54,7 @@ export async function generateKitForJob(
     let verifierIssues: Issue[] = [];
     let verifierModel: string | null = null;
     if (gatePassed(det)) {
-      // Only pay for the verifier when the cheap checks pass.
+      // Only pay for the verifier when the hard checks pass.
       const v = await verifyKitText(getClient(), profileEdit, { cover_letter: gen.kit.cover_letter, outreach_body: gen.kit.outreach_body }, job.raw.text);
       verifierIssues = v.issues;
       verifierModel = v.model;

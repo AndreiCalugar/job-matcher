@@ -53,7 +53,7 @@ export function GenerateForm({ jobId, hasKit }: { jobId: string; hasKit: boolean
       {state.status === "blocked" ? (
         <div className="rounded-lg border border-rule bg-surface p-4">
           <p className="text-small text-ink">
-            Generation blocked: the draft made {state.issues.length} claim{state.issues.length === 1 ? "" : "s"} the profile does not support. Nothing was saved. Generate again, or add the missing evidence to your profile if it is true.
+            Generation blocked: the draft stated {state.issues.length} fact{state.issues.length === 1 ? "" : "s"} that exist nowhere in your profile or the posting. Nothing was saved. Generate again; if the fact is true, add it to your profile first.
           </p>
           <ul className="mt-2 font-mono text-micro text-graphite">
             {state.issues.map((i, n) => (

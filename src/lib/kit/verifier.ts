@@ -9,8 +9,10 @@ import type { Issue } from "@/lib/kit/gate";
 
 // Anti-fabrication gate, layer 2: a cheap-tier model reads each sentence
 // against the profile. Catches what lexical checks cannot — "led" vs
-// "helped", an outcome attributed to the wrong role, a subtly inflated
-// scope. Any `unsupported` → block.
+// "helped", an outcome attributed to the wrong role. Its verdicts are
+// judgement, so they are `warn`: shown next to the letter for the user to
+// check, never a silent block. (First live run: 1 real catch, 2 false
+// positives.)
 
 export const VERIFY_PROMPT_VERSION = "kit-verify.v2";
 export const VERIFY_MODEL = "claude-haiku-4-5";
@@ -66,7 +68,7 @@ export async function verifyKitText(
       check: "verifier",
       where: `sentence ${s.index}`,
       detail: `${sentences[s.index] ?? "?"} — ${s.note ?? "unsupported"}`,
-      level: "block" as const,
+      level: "warn" as const,
     }));
   return { issues, usage: r.usage, model: r.model, sentences };
 }
