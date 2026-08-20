@@ -59,19 +59,28 @@ export async function callTool<S extends z.ZodType>(
   params: {
     model: string;
     max_tokens: number;
-    system: string;
+    // One or more system blocks. Each gets a cache breakpoint, so a stable
+    // prefix (prompt, then e.g. the profile) is read from cache on repeat
+    // calls at ~10% of input price. Order: most stable first.
+    system: string | string[];
     tool: Anthropic.Tool;
     schema: S;
     content: Anthropic.MessageParam["content"];
     // Adaptive thinking on strong-tier calls; omitted on cheap extraction.
     effort?: "low" | "medium" | "high";
+    // Per-call overrides (eval harness); production callers omit them.
+    modelOverride?: string;
   },
 ): Promise<ToolCallResult<z.infer<S>>> {
   const started = Date.now();
   const response = await client.messages.create({
-    model: params.model,
+    model: params.modelOverride ?? params.model,
     max_tokens: params.max_tokens,
-    system: [{ type: "text", text: params.system, cache_control: { type: "ephemeral" } }],
+    system: (Array.isArray(params.system) ? params.system : [params.system]).map((text) => ({
+      type: "text" as const,
+      text,
+      cache_control: { type: "ephemeral" as const },
+    })),
     tools: [params.tool],
     tool_choice: { type: "tool", name: params.tool.name },
     messages: [{ role: "user", content: params.content }],

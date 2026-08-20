@@ -1,8 +1,15 @@
 /**
  * Eval harness for the matcher (CLAUDE.md "Technical credibility §1").
  *
- *   npm run eval                 # score all fixture jobs, print rho
- *   npm run eval -- --min 0.6    # exit 1 below this correlation
+ *   npm run eval                              # default model/effort, print rho
+ *   npm run eval -- --model sonnet --effort medium --limit 10   # cheap loop
+ *   npm run eval -- --model opus --min 0.6    # recorded run; exit 1 below rho
+ *
+ * Cost control: the profile sits in the cached prompt prefix, so calls
+ * 2..n read it at 10% price. Use sonnet/medium while iterating on the
+ * prompt; confirm on opus. The eval set should also answer whether opus
+ * is needed at all — if a cheaper model matches the human ranking as
+ * well, ship the cheaper model.
  *
  * Inputs
  *   evals/fixtures/jobs.json     [{ id, title, company, url, text }]
@@ -32,8 +39,16 @@ const fixtureJobs = z
   .parse(JSON.parse(readFileSync(path.join(ROOT, "fixtures/jobs.json"), "utf8")));
 const ranking = z.array(z.string()).parse(JSON.parse(readFileSync(path.join(ROOT, "fixtures/ranking.json"), "utf8")));
 
-const minArg = process.argv.indexOf("--min");
-const MIN_RHO = minArg > -1 ? Number(process.argv[minArg + 1]) : null;
+const arg = (name: string) => {
+  const i = process.argv.indexOf(`--${name}`);
+  return i > -1 ? process.argv[i + 1] : undefined;
+};
+const MIN_RHO = arg("min") != null ? Number(arg("min")) : null;
+const MODELS: Record<string, string> = { opus: "claude-opus-5", sonnet: "claude-sonnet-5", haiku: "claude-haiku-4-5" };
+const modelArg = arg("model");
+const MODEL_OVERRIDE = modelArg ? (MODELS[modelArg] ?? modelArg) : undefined;
+const EFFORT = arg("effort") as "low" | "medium" | "high" | undefined;
+const LIMIT = arg("limit") != null ? Number(arg("limit")) : undefined;
 
 loadEnvLocal();
 const anthropic = new Anthropic();
@@ -57,7 +72,11 @@ async function main() {
   const scores: Record<string, number> = {};
   const rows: { id: string; title: string; score: number; verdict: string; human_rank: number | null; gaps: number; critical: number; ms: number }[] = [];
 
-  for (const job of fixtureJobs) {
+  const jobsToRun = LIMIT ? fixtureJobs.slice(0, LIMIT) : fixtureJobs;
+  if (LIMIT) console.log(`limit: scoring ${jobsToRun.length} of ${fixtureJobs.length} fixture jobs (rho over those only)`);
+  let totalIn = 0, totalOut = 0, totalCacheRead = 0, totalCacheWrite = 0;
+
+  for (const job of jobsToRun) {
     // Parse (cached by content hash + parser version)
     const key = `${contentHash(job.text)}.${PARSER_VERSION.replace(/[^a-z0-9.-]/gi, "_")}.json`;
     const cachePath = path.join(cacheDir, key);
@@ -77,8 +96,10 @@ async function main() {
       remote_policy: parsed.remote_policy, location: parsed.location, country: parsed.country, required_skills: parsed.required_skills,
       nice_to_have: parsed.nice_to_have, comp_min: parsed.comp_min, comp_max: parsed.comp_max, comp_currency: parsed.comp_currency,
       comp_period: parsed.comp_period, summary: parsed.summary, raw_text: job.text,
-    });
+    }, { model: MODEL_OVERRIDE, effort: EFFORT });
     const ms = Date.now() - t0;
+    totalIn += r.usage.input_tokens; totalOut += r.usage.output_tokens;
+    totalCacheRead += r.usage.cache_read_tokens; totalCacheWrite += r.usage.cache_creation_tokens;
     console.log(`${r.match.score} (${ms}ms)`);
     scores[job.id] = r.match.score;
     const hr = ranking.indexOf(job.id);
@@ -93,14 +114,19 @@ async function main() {
   rows.sort((a, b) => b.score - a.score);
   console.log("");
   console.table(rows.map((r, i) => ({ model_rank: i + 1, human_rank: r.human_rank, score: r.score, verdict: r.verdict, gaps: `${r.gaps} (${r.critical} crit)`, id: r.id, title: r.title.slice(0, 48) })));
-  console.log(`\nprompt ${PROMPT_VERSION} · n=${n}${missing.length ? ` · missing from scores: ${missing.join(", ")}` : ""}`);
+  const modelUsed = MODEL_OVERRIDE ?? "default";
+  console.log(`\nprompt ${PROMPT_VERSION} · model ${modelUsed} · effort ${EFFORT ?? "default"} · n=${n}${missing.length ? ` · missing from scores: ${missing.join(", ")}` : ""}`);
+  console.log(`tokens: ${totalIn} in · ${totalCacheWrite} cache-write · ${totalCacheRead} cache-read · ${totalOut} out`);
   console.log(`Spearman ρ = ${rho.toFixed(3)}`);
 
   const outDir = path.join(ROOT, "results");
   mkdirSync(outDir, { recursive: true });
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const out = path.join(outDir, `${PROMPT_VERSION}-${stamp}.json`);
-  writeFileSync(out, JSON.stringify({ prompt_version: PROMPT_VERSION, parser_version: PARSER_VERSION, profile_id: profile.id, rho, n, rows }, null, 1));
+  const out = path.join(outDir, `${PROMPT_VERSION}-${modelUsed}-${stamp}.json`);
+  writeFileSync(out, JSON.stringify({
+    prompt_version: PROMPT_VERSION, parser_version: PARSER_VERSION, model: modelUsed, effort: EFFORT ?? "default", profile_id: profile.id,
+    rho, n, tokens: { in: totalIn, cache_write: totalCacheWrite, cache_read: totalCacheRead, out: totalOut }, rows,
+  }, null, 1));
   console.log(`written ${path.relative(process.cwd(), out)}`);
 
   if (MIN_RHO != null && rho < MIN_RHO) {

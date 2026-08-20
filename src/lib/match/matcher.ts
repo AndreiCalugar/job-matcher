@@ -28,13 +28,16 @@ export type JobForMatch = Pick<
   | "required_skills" | "nice_to_have" | "comp_min" | "comp_max" | "comp_currency" | "comp_period" | "summary"
 > & { raw_text: string };
 
-export function buildUserMessage(profile: ProfileEdit, job: JobForMatch): string {
+// The profile is identical across every job scored in a session, so it
+// goes in the system prefix behind a cache breakpoint, not in the user
+// turn. 20 jobs → the profile is paid for once and read 19 times at 10%.
+export function buildProfileBlock(profile: ProfileEdit): string {
+  return `<profile>\n${JSON.stringify(profile, null, 1)}\n</profile>`;
+}
+
+export function buildUserMessage(job: JobForMatch): string {
   const { raw_text, ...parsed } = job;
   return [
-    "<profile>",
-    JSON.stringify(profile, null, 1),
-    "</profile>",
-    "",
     "<job_parsed>",
     JSON.stringify(parsed, null, 1),
     "</job_parsed>",
@@ -47,15 +50,23 @@ export function buildUserMessage(profile: ProfileEdit, job: JobForMatch): string
 
 export type MatchResult = { match: MatchParse; usage: ToolCallResult<MatchParse>["usage"]; model: string };
 
-export async function scoreMatch(client: MessagesClient, profile: ProfileEdit, job: JobForMatch): Promise<MatchResult> {
+export type MatchOptions = { model?: string; effort?: "low" | "medium" | "high" };
+
+export async function scoreMatch(
+  client: MessagesClient,
+  profile: ProfileEdit,
+  job: JobForMatch,
+  opts: MatchOptions = {},
+): Promise<MatchResult> {
   const r = await callTool(client, {
     model: MODEL,
+    modelOverride: opts.model,
     max_tokens: 8192,
-    system: loadPrompt(),
+    system: [loadPrompt(), buildProfileBlock(profile)],
     tool: buildTool(),
     schema: matchParse,
-    content: buildUserMessage(profile, job),
-    effort: "high",
+    content: buildUserMessage(job),
+    effort: opts.effort ?? "high",
   });
   return { match: r.data, usage: r.usage, model: r.model };
 }

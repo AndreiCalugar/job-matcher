@@ -6,7 +6,7 @@ import { cvParse } from "@/lib/cv/schema";
 import type { MessagesClient } from "@/lib/llm/tool-call";
 import { jobParse } from "@/lib/parse/schema";
 import { BANDS, COLLAPSE_BELOW, verdictFor } from "./bands";
-import { MODEL, PROMPT_VERSION, TOOL_NAME, buildTool, buildUserMessage, scoreMatch } from "./matcher";
+import { MODEL, PROMPT_VERSION, TOOL_NAME, buildProfileBlock, buildTool, buildUserMessage, scoreMatch } from "./matcher";
 import { matchParse } from "./schema";
 import { ranks, spearman, spearmanFromRanking } from "./spearman";
 
@@ -80,9 +80,9 @@ describe("matcher", () => {
   it("fixture validates; tool is strict; message carries profile, parsed job and raw posting", async () => {
     expect(matchParse.parse(expected)).toEqual(expected);
     expect(buildTool().strict).toBe(true);
-    const msg = buildUserMessage(profile, jobForMatch);
-    expect(msg).toContain("<profile>");
-    expect(msg).toContain("Nordpay ApS");
+    expect(buildProfileBlock(profile)).toContain("Nordpay ApS");
+    const msg = buildUserMessage(jobForMatch);
+    expect(msg).not.toContain("<profile>");
     expect(msg).toContain('"title": "Senior Frontend Engineer (React/TypeScript)"');
     expect(msg).toContain("<job_posting>");
   });
@@ -95,6 +95,18 @@ describe("matcher", () => {
     expect(calls[0]!.model).toBe("claude-opus-5");
     expect(calls[0]!.tool_choice).toEqual({ type: "tool", name: TOOL_NAME });
     expect(PROMPT_VERSION).toBe("match.v1");
+    // profile rides in the cached system prefix, after the prompt
+    const sys = calls[0]!.system as { text: string; cache_control?: unknown }[];
+    expect(sys).toHaveLength(2);
+    expect(sys[1]!.text).toContain("<profile>");
+    expect(sys.every((b) => b.cache_control)).toBe(true);
+  });
+
+  it("honours model/effort overrides for the eval harness", async () => {
+    const { client, calls } = fake(expected);
+    await scoreMatch(client, profile, jobForMatch, { model: "claude-sonnet-5", effort: "medium" });
+    expect(calls[0]!.model).toBe("claude-sonnet-5");
+    expect(calls[0]!.output_config).toEqual({ effort: "medium" });
   });
 
   it("rejects a score outside 0–100 or an unknown severity", async () => {
