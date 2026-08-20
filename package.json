@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "eval": "tsx evals/run.ts"
+    "eval": "tsx evals/run.ts",
+    "eval:fetch": "tsx evals/fetch.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0",
