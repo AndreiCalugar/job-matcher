@@ -97,6 +97,14 @@ describe("deterministic gate — fabrications are blocked", () => {
     expect(blocks(kit).filter((i) => i.check === "strengthen")).toEqual([]);
   });
 
+  it("lets the summary surface a verb that a role bullet already uses, but still blocks one used nowhere", () => {
+    // "Led" exists in experience[0].bullets[0]; the summary may say it.
+    const ok = { ...good, cv_changes: [{ path: "summary", current: profile.summary!, suggested: profile.summary + " Led the rebuild of a merchant onboarding flow.", reason: "x", severity: "polish" as const }] };
+    expect(blocks(ok).filter((i) => i.check === "strengthen")).toEqual([]);
+    const bad = { ...good, cv_changes: [{ path: "summary", current: profile.summary!, suggested: profile.summary + " Spearheaded the platform.", reason: "x", severity: "polish" as const }] };
+    expect(blocks(bad).some((i) => i.check === "strengthen" && i.detail.includes("spearheaded"))).toBe(true);
+  });
+
   it("blocks a claim whose source_path is invented", () => {
     const kit = { ...good, claims: [...good.claims, { claim: "shipped a Kafka pipeline", source_path: "experience[5].bullets[0]" }] };
     expect(blocks(kit).some((i) => i.check === "claim_path")).toBe(true);

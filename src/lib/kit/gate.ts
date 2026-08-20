@@ -43,8 +43,12 @@ export function deterministicGate(
     //    `suggested` but not in `current` and not in the profile entry being
     //    edited (the bullet or its parent role). "Led" at Nordpay does not
     //    license "led" at Finlo.
-    const scope = typeof node === "string" ? node : JSON.stringify(node);
-    const parent = parentEntry(profile, c.path);
+    // Summary and headline are aggregates: anything true anywhere in the
+    // profile may be surfaced there. Role/project-level edits are scoped to
+    // their own entry.
+    const aggregate = c.path === "summary" || c.path === "headline";
+    const scope = aggregate ? profCorpus : typeof node === "string" ? node : JSON.stringify(node);
+    const parent = aggregate ? profCorpus : parentEntry(profile, c.path);
     for (const verb of STRENGTHENERS) {
       const re = new RegExp(`\\b${verb}\\b`, "i");
       if (re.test(c.suggested) && !re.test(c.current) && !re.test(scope) && !re.test(parent)) {
