@@ -1,0 +1,6 @@
+.env*
+/data
+/private
+*.pdf
+node_modules
+.next
