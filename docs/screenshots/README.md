@@ -13,3 +13,8 @@ Naming: `phase-N-<what>-<theme>.jpg`. Test data only.
 - `phase-2-jobs-list-parsed-light.jpg` — list with parsed columns: level, remote, comp, flag count, parser state
 - `phase-2-job-detail-light.jpg` / `-dark.jpg` — parsed record: summary, required skills with importance and years, nice-to-haves, posting facts, parser version
 - `phase-2-job-detail-red-flags-dark.jpg` — a posting with three red flags, each with verbatim evidence (local dev)
+
+## Phase 3 — CV parsing + correction screen (2026-08-20, synthetic CV, local dev)
+- `phase-3-review-gaps-light.jpg` — review screen: what the parser noticed (overlapping roles, unsupported skills, summary vs dates)
+- `phase-3-review-experience-dark.jpg` — editable experience cards
+- `phase-3-profile-light.jpg` / `-dark.jpg` — confirmed profile read view

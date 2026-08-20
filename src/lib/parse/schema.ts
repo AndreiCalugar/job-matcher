@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { toolFromZod } from "@/lib/llm/tool-call";
 
 // Output contract for the job parser. This is the tool's input_schema (via
 // z.toJSONSchema) AND the runtime validator for what comes back. One source
@@ -56,29 +57,8 @@ export const jobParse = z.object({
 });
 export type JobParse = z.infer<typeof jobParse>;
 
-// JSON Schema for the tool definition. strict tool use requires
-// additionalProperties:false and a full `required` list, which Zod 4 emits
-// for plain objects. Verified by a test so a Zod upgrade cannot silently
-// break strictness.
+// JSON Schema for the tool definition lives in lib/llm/tool-call (shared
+// with the CV parser). Kept as a named export for the strictness test.
 export function jobParseJsonSchema(): Record<string, unknown> {
-  const schema = z.toJSONSchema(jobParse, { target: "draft-7" }) as Record<string, unknown>;
-  delete schema.$schema;
-  return stripUnsupported(schema) as Record<string, unknown>;
-}
-
-// Strict tool schemas accept a JSON Schema subset: no length/range/format
-// constraints. Zod still enforces them when the response is validated, so
-// nothing is lost — the model just is not told about them.
-const UNSUPPORTED = new Set(["minLength", "maxLength", "minimum", "maximum", "format", "pattern"]);
-function stripUnsupported(node: unknown): unknown {
-  if (Array.isArray(node)) return node.map(stripUnsupported);
-  if (node && typeof node === "object") {
-    const out: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(node)) {
-      if (UNSUPPORTED.has(k)) continue;
-      out[k] = stripUnsupported(v);
-    }
-    return out;
-  }
-  return node;
+  return toolFromZod("record_job", "", jobParse).input_schema as Record<string, unknown>;
 }

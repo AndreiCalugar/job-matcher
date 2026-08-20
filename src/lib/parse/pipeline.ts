@@ -75,6 +75,7 @@ export async function parseStoredJob(jobId: string, opts?: { force?: boolean }):
         input_tokens: result.usage.input_tokens,
         output_tokens: result.usage.output_tokens,
         cache_read_tokens: result.usage.cache_read_tokens,
+        cache_creation_tokens: result.usage.cache_creation_tokens,
         latency_ms: result.usage.latency_ms,
       });
       return { status: "parsed", jobId };

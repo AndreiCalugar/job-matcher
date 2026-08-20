@@ -1,0 +1,152 @@
+{
+  "full_name": "Jordan Example",
+  "headline": "Full-stack engineer",
+  "summary": "Full-stack engineer with six years across Danish fintech and freelance clients. React/TypeScript on the front, Node.js and .NET on the back. MSc in Computer Science.",
+  "location": "Copenhagen, Denmark",
+  "experience": [
+    {
+      "company": "Nordpay ApS",
+      "title": "Senior Software Engineer",
+      "start": "2022-03",
+      "end": null,
+      "current": true,
+      "location": "Copenhagen",
+      "employment_type": "permanent",
+      "bullets": [
+        "Led the rebuild of the merchant onboarding flow in Next.js and TypeScript, cutting drop-off by 18%.",
+        "Designed and ran PostgreSQL schema migrations for the ledger service.",
+        "Mentored two junior engineers."
+      ],
+      "stack": [
+        "React",
+        "Next.js",
+        "TypeScript",
+        "Node.js",
+        "PostgreSQL",
+        "AWS"
+      ]
+    },
+    {
+      "company": "Example Digital PFA",
+      "title": "Freelance Full-stack Developer",
+      "start": "2020-06",
+      "end": null,
+      "current": true,
+      "location": null,
+      "employment_type": "freelance",
+      "bullets": [
+        "Delivered a booking platform for a dental chain in React and .NET 6 with Azure SQL.",
+        "Built a Shopify integration in Node.js for an e-commerce client."
+      ],
+      "stack": [
+        "React",
+        ".NET",
+        "C#",
+        "Node.js",
+        "Azure"
+      ]
+    },
+    {
+      "company": "Finlo A/S",
+      "title": "Software Engineer",
+      "start": "2019-08",
+      "end": "2022-02",
+      "current": false,
+      "location": "Aarhus",
+      "employment_type": "permanent",
+      "bullets": [
+        "Built KYC verification screens in React and a document-processing service in C#/.NET Core.",
+        "Introduced end-to-end tests with Playwright."
+      ],
+      "stack": [
+        "React",
+        "TypeScript",
+        "C#",
+        ".NET",
+        "SQL Server",
+        "Playwright"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "name": "React",
+      "category": "framework",
+      "proficiency": "unclear",
+      "evidence": [
+        "React/TypeScript on the front",
+        "Stack: React, Next.js, TypeScript"
+      ]
+    },
+    {
+      "name": "TypeScript",
+      "category": "language",
+      "proficiency": "unclear",
+      "evidence": [
+        "React/TypeScript on the front"
+      ]
+    },
+    {
+      "name": "Kubernetes",
+      "category": "platform",
+      "proficiency": "unclear",
+      "evidence": [
+        "Docker, Playwright, Kubernetes"
+      ]
+    },
+    {
+      "name": "KYC",
+      "category": "domain",
+      "proficiency": "unclear",
+      "evidence": [
+        "Built KYC verification screens"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "gapcheck",
+      "url": "https://github.com/example/gapcheck",
+      "description": "open-source CLI that diffs a CV against a job ad.",
+      "stack": [
+        "TypeScript",
+        "Node.js"
+      ],
+      "role": null
+    }
+  ],
+  "education": [
+    {
+      "institution": "Aarhus University",
+      "degree": "MSc Computer Science",
+      "field": "Computer Science",
+      "start": "2017",
+      "end": "2019"
+    },
+    {
+      "institution": "Politehnica University of Timișoara",
+      "degree": "BSc Software Engineering",
+      "field": "Software Engineering",
+      "start": "2014",
+      "end": "2017"
+    }
+  ],
+  "languages": [
+    {
+      "name": "Romanian",
+      "level": "native"
+    },
+    {
+      "name": "English",
+      "level": "fluent"
+    },
+    {
+      "name": "Danish",
+      "level": "conversational"
+    }
+  ],
+  "gaps_noticed": [
+    "Kubernetes and Docker are listed as skills but no role names them.",
+    "The Nordpay and freelance roles overlap from 2022-03 to present."
+  ]
+}

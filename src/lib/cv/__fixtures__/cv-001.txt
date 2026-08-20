@@ -1,0 +1,39 @@
+Jordan Example
+Full-stack engineer · Copenhagen, Denmark · jordan@example.com
+
+Profile
+Full-stack engineer with six years across Danish fintech and freelance clients. React/TypeScript on the front, Node.js and .NET on the back. MSc in Computer Science.
+
+Experience
+
+Senior Software Engineer — Nordpay ApS, Copenhagen
+2022-03 – present (permanent)
+• Led the rebuild of the merchant onboarding flow in Next.js and TypeScript, cutting drop-off by 18%.
+• Designed and ran PostgreSQL schema migrations for the ledger service.
+• Mentored two junior engineers.
+Stack: React, Next.js, TypeScript, Node.js, PostgreSQL, AWS
+
+Freelance Full-stack Developer — Example Digital PFA (own company)
+2020-06 – present (freelance, part-time)
+• Delivered a booking platform for a dental chain in React and .NET 6 with Azure SQL.
+• Built a Shopify integration in Node.js for an e-commerce client.
+Stack: React, .NET, C#, Node.js, Azure
+
+Software Engineer — Finlo A/S, Aarhus
+2019-08 – 2022-02 (permanent)
+• Built KYC verification screens in React and a document-processing service in C#/.NET Core.
+• Introduced end-to-end tests with Playwright.
+Stack: React, TypeScript, C#, .NET, SQL Server
+
+Projects
+gapcheck — open-source CLI that diffs a CV against a job ad. TypeScript, Node.js. https://github.com/example/gapcheck
+
+Education
+MSc Computer Science — Aarhus University, 2017 – 2019
+BSc Software Engineering — Politehnica University of Timișoara, 2014 – 2017
+
+Skills
+TypeScript, React, Next.js, Node.js, C#, .NET, PostgreSQL, SQL Server, AWS, Azure, Docker, Playwright, Kubernetes
+
+Languages
+Romanian (native), English (fluent), Danish (conversational)

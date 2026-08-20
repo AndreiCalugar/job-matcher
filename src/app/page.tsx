@@ -10,7 +10,7 @@ export default async function JobsPage() {
   const jobs = await listJobs();
 
   return (
-    <Shell>
+    <Shell current="jobs">
       <header className="flex items-baseline justify-between">
         <h1 className="font-display text-display font-semibold text-ink">Jobs</h1>
         <p className="font-mono text-small text-graphite">

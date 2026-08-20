@@ -105,7 +105,7 @@ describe("parseJobText", () => {
   it("rejects a response whose tool input fails the schema", async () => {
     const bad = { ...expected, seniority: "rockstar", country: "Denmark" };
     await expect(parseJobText(fakeClient(bad), posting, null)).rejects.toMatchObject({
-      name: "ParseError",
+      name: "ToolCallError",
       stage: "validation",
     } satisfies Partial<ParseError>);
   });

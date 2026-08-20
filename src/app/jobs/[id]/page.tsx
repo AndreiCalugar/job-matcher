@@ -19,7 +19,7 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
   const failures = job.parsed_at ? [] : await getParseFailures(id);
 
   return (
-    <Shell>
+    <Shell current="jobs">
       <Link href="/" className="text-small text-graphite hover:text-ink">
         ← Jobs
       </Link>
