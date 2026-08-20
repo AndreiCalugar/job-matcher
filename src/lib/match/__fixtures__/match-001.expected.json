@@ -1,0 +1,17 @@
+{
+  "score": 62,
+  "matched_skills": [
+    { "skill": "React", "importance_in_job": "must", "evidence_from_profile": "Senior Software Engineer at Nordpay ApS: rebuilt the merchant onboarding flow in Next.js and TypeScript." },
+    { "skill": "TypeScript", "importance_in_job": "must", "evidence_from_profile": "Used across Nordpay and Finlo roles." },
+    { "skill": "PostgreSQL", "importance_in_job": "must", "evidence_from_profile": "Designed and ran PostgreSQL schema migrations for the ledger service (Nordpay)." },
+    { "skill": "Payments", "importance_in_job": "nice", "evidence_from_profile": "Nordpay ApS is a payments company; ledger and merchant onboarding work." }
+  ],
+  "gaps": [
+    { "skill": "5+ years React", "severity": "minor", "mitigable": true, "how_to_address": "Dated roles give ~4.5 years of React; state it plainly and lead with the scale of the Nordpay dashboard." },
+    { "skill": "Danish", "severity": "minor", "mitigable": true, "how_to_address": "Conversational Danish is listed; mention it rather than omit it." }
+  ],
+  "reasoning": "All must-haves are evidenced by real roles, including PostgreSQL at a payments company. Slightly under the stated years. Hybrid Copenhagen matches the profile's location.",
+  "premortem": "We had three candidates with the same stack and one of them had led a team; this one mentored two juniors but never owned delivery for a squad, and the posting says 'own the dashboard'. We went with the person who had already done that.",
+  "seniority_fit": "match",
+  "location_fit": "ok"
+}

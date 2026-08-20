@@ -7,8 +7,12 @@ import { reparseJob } from "@/lib/jobs/actions";
 import { formatComp, formatDate, host } from "@/lib/jobs/format";
 import { getJob } from "@/lib/jobs/queries";
 import { getParseFailures } from "@/lib/parse/queries";
+import { getProfile } from "@/lib/cv/queries";
+import { getMatchForJob } from "@/lib/match/queries";
+import { MatchPanel } from "@/components/match/match-panel";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 120;
 
 // Parsed record for one posting. No score, no verdict — those are Phase 4.
 // Red flags are content, rendered at body size in ink (DESIGN.md §7).
@@ -16,7 +20,12 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
   const { id } = await params;
   const job = await getJob(id);
   if (!job) notFound();
-  const failures = job.parsed_at ? [] : await getParseFailures(id);
+  const [failures, profile, match] = await Promise.all([
+    job.parsed_at ? Promise.resolve([]) : getParseFailures(id),
+    getProfile(),
+    getMatchForJob(id),
+  ]);
+  const canScore = !!profile?.human_corrected && !!job.parsed_at;
 
   return (
     <Shell current="jobs">
@@ -50,6 +59,12 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
           ) : null}
         </dl>
       </header>
+
+      {job.parsed_at ? (
+        <div className="mt-8">
+          <MatchPanel jobId={job.id} match={match} canScore={canScore} />
+        </div>
+      ) : null}
 
       {job.parsed_at ? (
         <div className="mt-8 grid gap-6 md:grid-cols-[minmax(360px,1fr)_minmax(300px,380px)]">

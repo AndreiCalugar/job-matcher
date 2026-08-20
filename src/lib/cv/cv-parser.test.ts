@@ -36,7 +36,8 @@ function fake(input: unknown): MessagesClient & { calls: Anthropic.MessageCreate
 describe("cv schema", () => {
   it("fixture validates, and with computed years it round-trips through profileEdit", () => {
     const parsed = cvParse.parse(expected);
-    const { full_name: _n, location: _l, gaps_noticed: _g, ...rest } = parsed;
+    const { headline, summary, experience, skills, projects, education, languages } = parsed;
+    const rest = { headline, summary, experience, skills, projects, education, languages };
     const stored = { ...rest, skills: rest.skills.map((s) => ({ ...s, years: computeSkillYears(rest.experience, s.name, NOW) })) };
     expect(profileEdit.parse(stored)).toEqual(stored);
   });

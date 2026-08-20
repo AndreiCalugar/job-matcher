@@ -31,3 +31,6 @@ npm-debug.log*
 
 # session log, kept local by choice
 BUILDLOG.md
+
+# eval caches (parses) — results/ is committed
+/evals/.cache

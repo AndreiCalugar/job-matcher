@@ -2,12 +2,20 @@ import { Shell } from "@/components/shell";
 import { JobsTable } from "@/components/jobs/jobs-table";
 import { PasteForm } from "@/components/jobs/paste-form";
 import { listJobs } from "@/lib/jobs/queries";
+import { getProfile } from "@/lib/cv/queries";
+import { getMatchesByJob } from "@/lib/match/queries";
+import Link from "next/link";
 
 // Reads on every request: the list must reflect the write that just happened.
 export const dynamic = "force-dynamic";
+// Paste → parse → score runs inline in one action; strong-tier scoring
+// takes 30–60s.
+export const maxDuration = 120;
 
 export default async function JobsPage() {
-  const jobs = await listJobs();
+  const [jobs, profile] = await Promise.all([listJobs(), getProfile()]);
+  const matches = await getMatchesByJob(jobs.map((j) => j.id));
+  const canScore = !!profile?.human_corrected;
 
   return (
     <Shell current="jobs">
@@ -25,7 +33,15 @@ export default async function JobsPage() {
           <h2 id="list-heading" className="eyebrow mb-2">
             Stored postings
           </h2>
-          <JobsTable jobs={jobs} />
+          {!canScore ? (
+            <p className="mb-3 rounded-lg border border-rule bg-surface px-4 py-3 text-small text-graphite">
+              {profile ? "Confirm your profile to enable scoring." : "Add your CV to enable scoring."}{" "}
+              <Link href="/profile" className="text-ink underline underline-offset-2">
+                Profile →
+              </Link>
+            </p>
+          ) : null}
+          <JobsTable jobs={jobs} matches={matches} canScore={canScore} />
         </section>
 
         <section

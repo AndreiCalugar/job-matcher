@@ -18,3 +18,7 @@ Naming: `phase-N-<what>-<theme>.jpg`. Test data only.
 - `phase-3-review-gaps-light.jpg` — review screen: what the parser noticed (overlapping roles, unsupported skills, summary vs dates)
 - `phase-3-review-experience-dark.jpg` — editable experience cards
 - `phase-3-profile-light.jpg` / `-dark.jpg` — confirmed profile read view
+
+## Phase 4 — match + gaps + pre-mortem (2026-08-20, local dev)
+- `phase-4-jobs-list-scored-light.jpg` / `-dark.jpg` — the calibration bar in the list: 68 / stretch, ticks at 25/50/75, unscored rows offer Score
+- (no detail-panel screenshot: the match evidence quotes the real profile)

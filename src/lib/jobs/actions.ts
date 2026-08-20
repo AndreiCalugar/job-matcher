@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase/server";
 import { contentHash } from "@/lib/jobs/hash";
 import { MANUAL_SOURCE_ID, pasteInput, type ManualRaw } from "@/lib/jobs/schema";
 import { parseStoredJob } from "@/lib/parse/pipeline";
+import { scoreStoredJob } from "@/lib/match/pipeline";
 
 export type PasteState =
   | { status: "idle" }
@@ -80,6 +81,9 @@ export async function storePastedJob(
   // parse failure is reported but never blocks the store — the row exists,
   // the failure is dead-lettered, and "Parse" on the row retries.
   const outcome = await parseStoredJob(inserted.data.id);
+  // Then score, if there is a reviewed profile. Skips silently otherwise;
+  // the list shows why.
+  if (outcome.status !== "failed") await scoreStoredJob(inserted.data.id);
   revalidatePath("/");
   return {
     status: "stored",

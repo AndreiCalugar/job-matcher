@@ -241,3 +241,8 @@
     }
   }
 }
+
+/* DESIGN.md §6: the one animated fill in the product — detail view only. */
+@keyframes sweep {
+  from { width: 0; }
+}
