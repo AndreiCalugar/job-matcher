@@ -69,7 +69,7 @@ export function PasteForm() {
 
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={pending}>
-          {pending ? "Storing" : "Store posting"}
+          {pending ? "Storing and parsing" : "Store posting"}
         </Button>
         <StatusLine state={state} />
       </div>
@@ -81,7 +81,15 @@ export function PasteForm() {
 function StatusLine({ state }: { state: PasteState }) {
   switch (state.status) {
     case "stored":
-      return <p className="text-small text-graphite">Stored. It is at the top of the list.</p>;
+      return state.parse === "parsed" ? (
+        <p className="text-small text-graphite">Stored and parsed. It is at the top of the list.</p>
+      ) : (
+        <p className="text-small text-graphite">
+          Stored, but parsing failed
+          {state.parseError ? <span className="font-mono"> ({state.parseError.slice(0, 80)})</span> : null}. Use
+          Parse on the row to retry.
+        </p>
+      );
     case "duplicate":
       return (
         <p className="text-small text-graphite">

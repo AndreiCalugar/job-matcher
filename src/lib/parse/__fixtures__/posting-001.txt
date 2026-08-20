@@ -1,0 +1,24 @@
+Senior Frontend Engineer (React/TypeScript) — Copenhagen, hybrid
+
+About us
+We are a Series B fintech building payment infrastructure for Nordic merchants. ~120 people, engineering in Copenhagen and Stockholm.
+
+The role
+You will own the merchant dashboard: a Next.js application used by 8,000 businesses daily. You will work with two backend engineers and a designer, ship weekly, and be on a light on-call rotation.
+
+What we need
+- 5+ years building production web applications with React and TypeScript
+- Solid experience with Next.js (App Router) and a Node.js backend
+- Comfortable with PostgreSQL and writing the occasional migration
+- You have shipped accessible, tested UI and can explain your trade-offs
+
+Nice to have
+- Experience in payments or another regulated domain
+- Danish language skills
+
+Practicalities
+- Permanent, full-time. Hybrid: 3 days/week in our Copenhagen office.
+- Salary DKK 55,000–65,000 per month depending on experience, plus pension.
+- Immediate start preferred. We move fast and wear many hats.
+
+Apply via our careers page. No agencies.

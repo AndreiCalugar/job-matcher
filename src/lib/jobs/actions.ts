@@ -4,10 +4,11 @@ import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase/server";
 import { contentHash } from "@/lib/jobs/hash";
 import { MANUAL_SOURCE_ID, pasteInput, type ManualRaw } from "@/lib/jobs/schema";
+import { parseStoredJob } from "@/lib/parse/pipeline";
 
 export type PasteState =
   | { status: "idle" }
-  | { status: "stored"; id: string }
+  | { status: "stored"; id: string; parse: "parsed" | "failed"; parseError?: string }
   | { status: "duplicate"; id: string; firstSeen: string }
   | { status: "invalid"; fieldErrors: { text?: string; url?: string } }
   | { status: "error"; message: string };
@@ -75,6 +76,26 @@ export async function storePastedJob(
   if (inserted.error) {
     return { status: "error", message: `Insert failed: ${inserted.error.message}` };
   }
+  // Parse inline: paste-to-ready-kit in under two minutes starts here. A
+  // parse failure is reported but never blocks the store — the row exists,
+  // the failure is dead-lettered, and "Parse" on the row retries.
+  const outcome = await parseStoredJob(inserted.data.id);
   revalidatePath("/");
-  return { status: "stored", id: inserted.data.id };
+  return {
+    status: "stored",
+    id: inserted.data.id,
+    parse: outcome.status === "failed" ? "failed" : "parsed",
+    ...(outcome.status === "failed" ? { parseError: outcome.error } : {}),
+  };
+}
+
+// Retry (or force re-run) the parser for one row. Used by the row action and
+// by the detail page.
+export async function reparseJob(formData: FormData): Promise<void> {
+  const id = String(formData.get("id") ?? "");
+  const force = formData.get("force") === "1";
+  if (!id) return;
+  await parseStoredJob(id, { force });
+  revalidatePath("/");
+  revalidatePath(`/jobs/${id}`);
 }

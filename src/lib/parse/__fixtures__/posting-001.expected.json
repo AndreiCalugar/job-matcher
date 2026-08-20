@@ -1,0 +1,31 @@
+{
+  "title": "Senior Frontend Engineer (React/TypeScript)",
+  "company_name": null,
+  "seniority": "senior",
+  "employment_type": "permanent",
+  "remote_policy": "hybrid",
+  "location": "Copenhagen",
+  "country": "DK",
+  "required_skills": [
+    { "name": "React", "importance": "must", "years_wanted": 5 },
+    { "name": "TypeScript", "importance": "must", "years_wanted": 5 },
+    { "name": "Next.js", "importance": "must", "years_wanted": null },
+    { "name": "Node.js", "importance": "must", "years_wanted": null },
+    { "name": "PostgreSQL", "importance": "must", "years_wanted": null },
+    { "name": "Accessibility", "importance": "must", "years_wanted": null },
+    { "name": "Payments", "importance": "nice", "years_wanted": null },
+    { "name": "Danish", "importance": "nice", "years_wanted": null }
+  ],
+  "nice_to_have": [{ "name": "Payments" }, { "name": "Danish" }],
+  "comp_min": 55000,
+  "comp_max": 65000,
+  "comp_currency": "DKK",
+  "comp_period": "month",
+  "comp_stated": true,
+  "red_flags": [
+    { "kind": "wear_many_hats", "evidence": "We move fast and wear many hats.", "severity": "medium" },
+    { "kind": "urgency_pressure", "evidence": "Immediate start preferred.", "severity": "low" }
+  ],
+  "summary": "Own the merchant dashboard (Next.js) at a Series B Nordic payments company, working with two backend engineers and a designer in a hybrid Copenhagen role.",
+  "language": "en"
+}
