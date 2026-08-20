@@ -83,7 +83,7 @@ describe("tool schema", () => {
 describe("prompt", () => {
   it("loads the versioned file and the version is stamped into parser_version", () => {
     expect(loadPrompt()).toContain("record_job");
-    expect(PARSER_VERSION).toBe(`job-parse.v1/${MODEL}`);
+    expect(PARSER_VERSION).toBe(`job-parse.v2/${MODEL}`);
   });
 });
 

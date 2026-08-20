@@ -8,7 +8,7 @@ import { jobParse, jobParseJsonSchema, type JobParse } from "@/lib/parse/schema"
 // only when the stored value differs from PARSER_VERSION. Bump PROMPT_VERSION
 // on any prompt change; MODEL changes bump the composite automatically.
 // ---------------------------------------------------------------------------
-export const PROMPT_VERSION = "job-parse.v1";
+export const PROMPT_VERSION = "job-parse.v2";
 // CLAUDE.md model routing: extraction is high-volume, low-judgement → cheap
 // tier. Matching and kit generation (Phases 4–5) use the strong tier.
 export const MODEL = "claude-haiku-4-5";

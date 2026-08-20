@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { reparseJob } from "@/lib/jobs/actions";
 import { firstLine, formatComp, formatDate } from "@/lib/jobs/format";
 import type { JobRow } from "@/lib/jobs/schema";
+import { PARSER_VERSION } from "@/lib/parse/job-parser";
 
 // Dense list per DESIGN.md §4: 40px rows, sticky eyebrow header, hairlines,
 // no zebra, every figure in mono. No score column yet — that is Phase 4, and
@@ -55,13 +56,15 @@ export function JobsTable({ jobs }: { jobs: JobRow[] }) {
                 {job.red_flags ? job.red_flags.length : "—"}
               </TableCell>
               <TableCell>
-                {job.parsed_at ? (
+                {job.parser_version === PARSER_VERSION ? (
                   <Badge>parsed</Badge>
                 ) : (
+                  // Never parsed, or parsed by an older prompt/model. Either
+                  // way the current parser has not seen it.
                   <form action={reparseJob}>
                     <input type="hidden" name="id" value={job.id} />
                     <Button type="submit" variant="outline" size="xs">
-                      Parse
+                      {job.parsed_at ? "Re-parse" : "Parse"}
                     </Button>
                   </form>
                 )}
