@@ -10,6 +10,7 @@ import { scoreStoredJob } from "@/lib/match/pipeline";
 import { PARSER_VERSION } from "@/lib/parse/job-parser";
 import { parseStoredJob } from "@/lib/parse/pipeline";
 import { supabase } from "@/lib/supabase/server";
+import { shouldGhost } from "@/lib/tracking/stats";
 
 // The unattended loop. Runs from GitHub Actions on a schedule and from
 // `npm run ingest` locally. Every stage survives one bad item: a source
@@ -30,6 +31,7 @@ export type RunReport = {
   sources: { id: string; kind: string; identifier: string; status: "ok" | "error" | "empty"; seen: number; inserted: number; touched: number; closed: number; error?: string }[];
   parsed: number;
   parseFailed: number;
+  ghosted: number;
   scored: number;
   scoreSkippedByFilter: number;
   scoreFailed: number;
@@ -43,7 +45,19 @@ const sourceRow = z.object({
 export async function runIngest(opts: RunOptions = {}): Promise<RunReport> {
   const http = opts.http ?? defaultHttp();
   const log = opts.log ?? (() => {});
-  const report: RunReport = { sources: [], parsed: 0, parseFailed: 0, scored: 0, scoreSkippedByFilter: 0, scoreFailed: 0 };
+  const report: RunReport = { sources: [], parsed: 0, parseFailed: 0, ghosted: 0, scored: 0, scoreSkippedByFilter: 0, scoreFailed: 0 };
+
+  // ---- 0. ghost sweep: applied, no response, past the user's threshold ----
+  const { data: prof } = await supabase.from("profile").select("ghost_after_days").eq("human_corrected", true).order("created_at", { ascending: false }).limit(1).maybeSingle();
+  const ghostAfter = prof?.ghost_after_days ?? 21;
+  const { data: openApps } = await supabase.from("application").select("id, status, sent_at, first_response_at").eq("status", "applied");
+  const now0 = new Date();
+  const toGhost = (openApps ?? []).filter((a) => shouldGhost(a, ghostAfter, now0)).map((a) => a.id);
+  if (toGhost.length) {
+    await supabase.from("application").update({ status: "ghosted", closed_at: now0.toISOString(), updated_at: now0.toISOString() }).in("id", toGhost);
+    report.ghosted = toGhost.length;
+    log(`ghosted ${toGhost.length} application(s) after ${ghostAfter} days`);
+  }
 
   // ---- 1. fetch every enabled feed/query source ---------------------------
   let q = supabase.from("source").select("id, kind, identifier, enabled, company_id, config").eq("enabled", true).neq("kind", "manual");

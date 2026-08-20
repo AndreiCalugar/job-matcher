@@ -53,16 +53,38 @@ export async function saveKitText(formData: FormData): Promise<void> {
   revalidatePath(`/jobs/${jobId}/kit`);
 }
 
-// The human pressed send, elsewhere. Record exactly what went out.
+// The human pressed send, elsewhere. Record exactly what went out, and
+// open the application in the tracking pipeline (Phase 7). One
+// application per kit; re-marking updates the sent copy only.
 export async function markSent(formData: FormData): Promise<void> {
   const kitId = String(formData.get("kit_id") ?? "");
   const jobId = String(formData.get("job_id") ?? "");
   const body = String(formData.get("final_sent_body") ?? "");
-  await supabase
+  const now = new Date().toISOString();
+  const kit = await supabase
     .from("application_kit")
-    .update({ final_sent_body: body, sent_at: new Date().toISOString() })
-    .eq("id", kitId);
+    .update({ final_sent_body: body, sent_at: now })
+    .eq("id", kitId)
+    .select("id, match_id, profile_id, channel, angle, match:match_id(score, verdict)")
+    .single();
+  if (kit.error || !kit.data) return;
+  const existing = await supabase.from("application").select("id").eq("kit_id", kitId).maybeSingle();
+  if (!existing.data) {
+    const m = kit.data.match as unknown as { score: number; verdict: string } | null;
+    await supabase.from("application").insert({
+      kit_id: kitId,
+      job_id: jobId,
+      match_id: kit.data.match_id,
+      profile_id: kit.data.profile_id,
+      channel: kit.data.channel,
+      angle: kit.data.angle,
+      score_at_send: m?.score ?? null,
+      verdict_at_send: m?.verdict ?? null,
+      sent_at: now,
+    });
+  }
   revalidatePath(`/jobs/${jobId}/kit`);
   revalidatePath(`/jobs/${jobId}`);
   revalidatePath("/");
+  revalidatePath("/applications");
 }

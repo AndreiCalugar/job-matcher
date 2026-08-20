@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CopyButton } from "@/components/kit/copy-button";
 import { Badge } from "@/components/jobs/jobs-table";
 import { Button } from "@/components/ui/button";
@@ -159,10 +160,15 @@ export function KitView({ kit, jobId, applyUrl }: { kit: KitRow; jobId: string; 
           <input type="hidden" name="kit_id" value={kit.id} />
           <input type="hidden" name="job_id" value={jobId} />
           <Textarea name="final_sent_body" defaultValue={kit.final_sent_body ?? kit.cover_letter} rows={8} className="max-w-[72ch] font-sans text-body" />
-          <div>
+          <div className="flex items-center gap-3">
             <Button type="submit" size="sm">
               {kit.sent_at ? "Update sent copy" : "Mark as sent"}
             </Button>
+            {kit.sent_at ? (
+              <Link href="/applications" className="text-small text-graphite underline-offset-2 hover:text-ink hover:underline">
+                Tracked in Applications →
+              </Link>
+            ) : null}
           </div>
         </form>
       </section>

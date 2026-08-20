@@ -200,6 +200,17 @@
   --ease-system: var(--ease);
 }
 
+/* Eyebrow / field-name style — DESIGN.md §3 "micro". A utility (not a
+   plain class) so variants like [&>th]:eyebrow and md:eyebrow work. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  line-height: var(--text-micro--line-height);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--graphite);
+}
+
 /* ==========================================================================
    4. Base styles.
    ========================================================================== */
@@ -221,11 +232,6 @@
   .font-display {
     font-stretch: 125%;
     letter-spacing: -0.01em;
-  }
-  /* Eyebrow / field-name style — DESIGN.md §3 "micro". */
-  .eyebrow {
-    @apply font-mono text-micro uppercase text-graphite;
-    letter-spacing: 0.08em;
   }
   /* Focus ring per DESIGN.md §4: 2px ink, 2px offset, never removed. */
   :where(button, [role="button"], a, input, textarea, select):focus-visible {

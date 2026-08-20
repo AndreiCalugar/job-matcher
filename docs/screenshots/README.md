@@ -22,3 +22,9 @@ Naming: `phase-N-<what>-<theme>.jpg`. Test data only.
 ## Phase 4 — match + gaps + pre-mortem (2026-08-20, local dev)
 - `phase-4-jobs-list-scored-light.jpg` / `-dark.jpg` — the calibration bar in the list: 68 / stretch, ticks at 25/50/75, unscored rows offer Score
 - (no detail-panel screenshot: the match evidence quotes the real profile)
+
+## Phase 6 — automated ingest (2026-08-20, local dev)
+- `phase-6-sources-light.jpg` — subscribe by careers URL, aggregator queries, run log (one Jobicy source after its first run: 64 seen)
+
+## Phase 7 — tracking + statistics (2026-08-20, local dev)
+- `phase-7-statistics-empty-light.jpg` — the calibration chart with no data yet: the structure is the promise; it fills as applications are sent
