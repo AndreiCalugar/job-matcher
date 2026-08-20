@@ -8,3 +8,8 @@ Naming: `phase-N-<what>-<theme>.jpg`. Test data only.
 - `phase-1-jobs-list-dark.jpg` — two stored postings, production
 - `phase-1-jobs-list-light.jpg` — same, light theme
 - `phase-1-duplicate-detected-light.jpg` — re-pasting an existing ad: no new row, `last_seen` bumped
+
+## Phase 2 — job parsing (2026-08-20)
+- `phase-2-jobs-list-parsed-light.jpg` — list with parsed columns: level, remote, comp, flag count, parser state
+- `phase-2-job-detail-light.jpg` / `-dark.jpg` — parsed record: summary, required skills with importance and years, nice-to-haves, posting facts, parser version
+- `phase-2-job-detail-red-flags-dark.jpg` — a posting with three red flags, each with verbatim evidence (local dev)
