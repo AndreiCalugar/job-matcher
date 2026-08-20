@@ -1,0 +1,257 @@
+{
+ "prompt_version": "match.v1",
+ "parser_version": "job-parse.v2/claude-haiku-4-5",
+ "model": "claude-sonnet-5",
+ "effort": "medium",
+ "profile_id": "2add44bc-2ec1-4438-ac33-fc3d1be46c3e",
+ "rho": -0.10572424394399559,
+ "n": 24,
+ "tokens": {
+  "in": 64269,
+  "cache_write": 10811,
+  "cache_read": 248653,
+  "out": 33529
+ },
+ "rows": [
+  {
+   "id": "jb-151128",
+   "title": "Sr Software Engineer",
+   "score": 62,
+   "verdict": "stretch",
+   "human_rank": 23,
+   "gaps": 5,
+   "critical": 0,
+   "ms": 15734
+  },
+  {
+   "id": "jb-150897",
+   "title": "Senior Product Engineer (TypeScript)",
+   "score": 55,
+   "verdict": "stretch",
+   "human_rank": 15,
+   "gaps": 4,
+   "critical": 1,
+   "ms": 16094
+  },
+  {
+   "id": "an-software-engineer-platform-munich-germany-161452",
+   "title": "Software Engineer, Platform",
+   "score": 48,
+   "verdict": "weak",
+   "human_rank": 4,
+   "gaps": 0,
+   "critical": 0,
+   "ms": 7537
+  },
+  {
+   "id": "jb-145861",
+   "title": "Senior Full Stack Engineer",
+   "score": 45,
+   "verdict": "weak",
+   "human_rank": 6,
+   "gaps": 4,
+   "critical": 1,
+   "ms": 15253
+  },
+  {
+   "id": "an-software-engineer-platform-hamburg-germany-97329",
+   "title": "Software Engineer, Platform",
+   "score": 45,
+   "verdict": "weak",
+   "human_rank": 1,
+   "gaps": 5,
+   "critical": 0,
+   "ms": 16306
+  },
+  {
+   "id": "an-product-growth-engineer-berlin-367821",
+   "title": "Product Growth Engineer",
+   "score": 38,
+   "verdict": "weak",
+   "human_rank": 24,
+   "gaps": 4,
+   "critical": 1,
+   "ms": 15242
+  },
+  {
+   "id": "an-fullstack-engineer-merchant-emea-berlin-399199",
+   "title": "Fullstack Engineer, Merchant EMEA",
+   "score": 38,
+   "verdict": "weak",
+   "human_rank": 14,
+   "gaps": 4,
+   "critical": 2,
+   "ms": 17192
+  },
+  {
+   "id": "an-remote-product-engineer-26924",
+   "title": "Product Engineer",
+   "score": 38,
+   "verdict": "weak",
+   "human_rank": 22,
+   "gaps": 6,
+   "critical": 3,
+   "ms": 19171
+  },
+  {
+   "id": "jb-150846",
+   "title": "Software Engineer 3",
+   "score": 35,
+   "verdict": "weak",
+   "human_rank": 7,
+   "gaps": 4,
+   "critical": 2,
+   "ms": 13808
+  },
+  {
+   "id": "jb-150883",
+   "title": "Contract Senior Front-End Engineer",
+   "score": 30,
+   "verdict": "mismatch",
+   "human_rank": 8,
+   "gaps": 4,
+   "critical": 1,
+   "ms": 15032
+  },
+  {
+   "id": "jb-148317",
+   "title": "Senior Customer Engineer",
+   "score": 30,
+   "verdict": "mismatch",
+   "human_rank": 20,
+   "gaps": 5,
+   "critical": 2,
+   "ms": 17782
+  },
+  {
+   "id": "an-full-stack-developer-berlin-hybrid-62219",
+   "title": "Full-Stack Developer",
+   "score": 28,
+   "verdict": "mismatch",
+   "human_rank": 11,
+   "gaps": 5,
+   "critical": 3,
+   "ms": 15972
+  },
+  {
+   "id": "jb-151043",
+   "title": "Senior Full Stack Engineer, Platform Extensions",
+   "score": 22,
+   "verdict": "mismatch",
+   "human_rank": 13,
+   "gaps": 4,
+   "critical": 1,
+   "ms": 13554
+  },
+  {
+   "id": "an-forward-deployed-ai-engineer-eu-uk-260204",
+   "title": "Forward Deployed AI Engineer",
+   "score": 22,
+   "verdict": "mismatch",
+   "human_rank": 21,
+   "gaps": 8,
+   "critical": 4,
+   "ms": 20061
+  },
+  {
+   "id": "jb-150366",
+   "title": "Senior Full-Stack Software Engineer – Fusion Operations",
+   "score": 22,
+   "verdict": "mismatch",
+   "human_rank": 2,
+   "gaps": 8,
+   "critical": 1,
+   "ms": 18549
+  },
+  {
+   "id": "jb-150101",
+   "title": "Senior Customer Support Engineer",
+   "score": 22,
+   "verdict": "mismatch",
+   "human_rank": 19,
+   "gaps": 5,
+   "critical": 2,
+   "ms": 14601
+  },
+  {
+   "id": "jb-150580",
+   "title": "Senior AI Software Engineer",
+   "score": 18,
+   "verdict": "mismatch",
+   "human_rank": 3,
+   "gaps": 6,
+   "critical": 2,
+   "ms": 19536
+  },
+  {
+   "id": "an-senior-software-engineer-hybrid-munchen-146453",
+   "title": "Senior Software Engineer",
+   "score": 18,
+   "verdict": "mismatch",
+   "human_rank": 18,
+   "gaps": 5,
+   "critical": 2,
+   "ms": 15365
+  },
+  {
+   "id": "jb-150933",
+   "title": "Senior Software Engineer, Elixir",
+   "score": 15,
+   "verdict": "mismatch",
+   "human_rank": 10,
+   "gaps": 3,
+   "critical": 1,
+   "ms": 14007
+  },
+  {
+   "id": "an-senior-full-stack-engineer-python-django-vuejs-b",
+   "title": "Senior Full-Stack Engineer Python Django Vue.js",
+   "score": 15,
+   "verdict": "mismatch",
+   "human_rank": 16,
+   "gaps": 7,
+   "critical": 4,
+   "ms": 15860
+  },
+  {
+   "id": "jb-150127",
+   "title": "Senior Software Engineer",
+   "score": 15,
+   "verdict": "mismatch",
+   "human_rank": 17,
+   "gaps": 8,
+   "critical": 4,
+   "ms": 16100
+  },
+  {
+   "id": "an-web-frontend-developer-all-genders-de-hamburg-15",
+   "title": "Web Frontend Developer",
+   "score": 12,
+   "verdict": "mismatch",
+   "human_rank": 5,
+   "gaps": 5,
+   "critical": 2,
+   "ms": 13148
+  },
+  {
+   "id": "an-backend-engineer-founding-team-augsburg-263526",
+   "title": "Backend Engineer, Founding Team",
+   "score": 12,
+   "verdict": "mismatch",
+   "human_rank": 12,
+   "gaps": 4,
+   "critical": 1,
+   "ms": 13514
+  },
+  {
+   "id": "an-senior-backend-engineer-martech-berlin-129688",
+   "title": "Senior Backend Engineer MarTech",
+   "score": 8,
+   "verdict": "mismatch",
+   "human_rank": 9,
+   "gaps": 6,
+   "critical": 5,
+   "ms": 16497
+  }
+ ]
+}

@@ -37,7 +37,9 @@ const ROOT = path.resolve(__dirname);
 const fixtureJobs = z
   .array(z.object({ id: z.string(), title: z.string().optional(), company: z.string().optional(), url: z.string().nullable().optional(), text: z.string().min(80) }))
   .parse(JSON.parse(readFileSync(path.join(ROOT, "fixtures/jobs.json"), "utf8")));
-const ranking = z.array(z.string()).parse(JSON.parse(readFileSync(path.join(ROOT, "fixtures/ranking.json"), "utf8")));
+// ranking.json may hold ids or 1-based row numbers from POSTINGS.md's table.
+const rankingRaw = z.array(z.union([z.string(), z.number().int().positive()])).parse(JSON.parse(readFileSync(path.join(ROOT, "fixtures/ranking.json"), "utf8")));
+const ranking = rankingRaw.map((r) => (typeof r === "number" ? (fixtureJobs[r - 1]?.id ?? `#${r}`) : r));
 
 const arg = (name: string) => {
   const i = process.argv.indexOf(`--${name}`);
