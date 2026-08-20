@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CalibrationBar } from "@/components/match/calibration-bar";
 import { Button } from "@/components/ui/button";
 import { scoreJob } from "@/lib/match/actions";
@@ -84,7 +85,11 @@ export function MatchPanel({ jobId, match, canScore }: { jobId: string; match: M
       <h3 className="eyebrow mt-8 mb-2">Reasoning</h3>
       <p className="max-w-[68ch] text-body text-graphite">{match.reasoning}</p>
 
-      <form action={scoreJob} className="mt-6 flex items-center gap-3">
+      <div className="mt-6 flex items-center gap-3">
+        <Link href={`/jobs/${jobId}/kit`} className="inline-flex h-8 items-center rounded-md bg-ink px-3 text-body font-medium text-paper">
+          Generate kit →
+        </Link>
+      <form action={scoreJob} className="flex items-center gap-3">
         <input type="hidden" name="id" value={jobId} />
         <input type="hidden" name="force" value="1" />
         <Button type="submit" variant="outline" size="xs">
@@ -94,6 +99,7 @@ export function MatchPanel({ jobId, match, canScore }: { jobId: string; match: M
           {match.prompt_version} · {match.model_version} · {formatDate(match.computed_at)}
         </span>
       </form>
+      </div>
     </section>
   );
 }

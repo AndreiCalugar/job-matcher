@@ -131,7 +131,7 @@ async function main() {
     }
   }
 
-  writeFileSync(path.join(ROOT, "fixtures/jobs.json"), JSON.stringify(final.map(({ source: _s, location: _l, ...j }) => j), null, 1));
+  writeFileSync(path.join(ROOT, "fixtures/jobs.json"), JSON.stringify(final.map((j) => ({ id: j.id, title: j.title, company: j.company, url: j.url, text: j.text })), null, 1));
   const md = [
     "# Postings to rank",
     "",

@@ -1,0 +1,40 @@
+{
+  "angle": "domain_overlap",
+  "angle_reason": "The posting is a payments company and the profile's current role is at a payments company.",
+  "cv_changes": [
+    {
+      "path": "summary",
+      "current": "Full-stack engineer with six years across Danish fintech and freelance clients. React/TypeScript on the front, Node.js and .NET on the back. MSc in Computer Science.",
+      "suggested": "Full-stack engineer with six years across Danish fintech and freelance clients, most recently owning a Next.js merchant dashboard at a payments company. React/TypeScript on the front, Node.js and .NET on the back. MSc in Computer Science.",
+      "reason": "The posting asks for Next.js and payments; both are in the profile but not in the summary.",
+      "severity": "important"
+    },
+    {
+      "path": "experience[0].bullets[1]",
+      "current": "Designed and ran PostgreSQL schema migrations for the ledger service.",
+      "suggested": "Designed and ran PostgreSQL schema migrations for the ledger service.",
+      "reason": "PostgreSQL is a must-have; move this bullet to first position in the role.",
+      "severity": "important"
+    },
+    {
+      "path": "skills",
+      "current": "",
+      "suggested": "Order the skills list: React, Next.js, TypeScript, Node.js, PostgreSQL first.",
+      "reason": "Matches the posting's must-have order.",
+      "severity": "polish"
+    }
+  ],
+  "cover_letter": "Hiring team,\n\nI am applying for the Senior Frontend Engineer role because it is the work I do now: I own the merchant onboarding flow at Nordpay ApS, a Next.js and TypeScript application, and I ran the PostgreSQL schema migrations for its ledger service.\n\nAt Finlo A/S I built KYC verification screens in React, so the regulated-domain context in your posting is familiar. I mentored two junior engineers at Nordpay and introduced end-to-end tests with Playwright at Finlo.\n\nI live in Copenhagen and the hybrid arrangement suits me.\n\nJordan Example",
+  "outreach_subject": null,
+  "outreach_body": null,
+  "gap_handling": [
+    { "gap": "5+ years React", "approach": "Dated roles give about 4.5 years of React; say so if asked and point to the scale of the Nordpay dashboard." }
+  ],
+  "claims": [
+    { "claim": "owns the merchant onboarding flow at Nordpay ApS, Next.js and TypeScript", "source_path": "experience[0].bullets[0]" },
+    { "claim": "ran PostgreSQL schema migrations for the ledger service", "source_path": "experience[0].bullets[1]" },
+    { "claim": "built KYC verification screens in React at Finlo A/S", "source_path": "experience[2].bullets[0]" },
+    { "claim": "mentored two junior engineers", "source_path": "experience[0].bullets[2]" },
+    { "claim": "introduced end-to-end tests with Playwright", "source_path": "experience[2].bullets[1]" }
+  ]
+}
