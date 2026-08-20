@@ -8,6 +8,7 @@ import { PARSER_VERSION, parseCvText } from "@/lib/cv/cv-parser";
 import { pdfToText } from "@/lib/cv/extract";
 import { normalise } from "@/lib/cv/normalise";
 import { profileEdit } from "@/lib/cv/schema";
+import { requireUser } from "@/lib/auth/session";
 import { computeSkillYears } from "@/lib/cv/years";
 import { ToolCallError } from "@/lib/llm/tool-call";
 import { supabase } from "@/lib/supabase/server";
@@ -22,6 +23,7 @@ const MIN_CHARS = 300;
 // CV in (PDF file or pasted text) → parsed profile row → redirect to the
 // non-skippable review screen. One strong-model call; failure leaves no row.
 export async function uploadCv(_prev: UploadState, formData: FormData): Promise<UploadState> {
+  const user = await requireUser();
   const file = formData.get("file");
   const pasted = String(formData.get("text") ?? "").trim();
 
@@ -63,6 +65,7 @@ export async function uploadCv(_prev: UploadState, formData: FormData): Promise<
   const inserted = await supabase
     .from("profile")
     .insert({
+      user_id: user.id,
       headline: p.headline,
       summary: p.summary,
       experience: p.experience,
@@ -82,6 +85,8 @@ export async function uploadCv(_prev: UploadState, formData: FormData): Promise<
 
   await supabase.from("usage_event").insert({
     kind: "cv_parsed",
+    user_id: user.id,
+    profile_id: inserted.data.id,
     model: parsed.model,
     input_tokens: parsed.usage.input_tokens,
     output_tokens: parsed.usage.output_tokens,
@@ -102,8 +107,11 @@ export type SaveState = { status: "idle" } | { status: "saved" } | { status: "in
 // in one field; Zod is the gate. Marks human_corrected — from here on this
 // row is ground truth and no parser overwrites it.
 export async function saveProfile(_prev: SaveState, formData: FormData): Promise<SaveState> {
+  const user = await requireUser();
   const id = z.string().uuid().safeParse(formData.get("id"));
   if (!id.success) return { status: "invalid", message: "Missing profile id." };
+  const owner = await supabase.from("profile").select("user_id").eq("id", id.data).single();
+  if (owner.data?.user_id !== user.id) return { status: "error", message: "Not your profile." };
 
   let json: unknown;
   try {

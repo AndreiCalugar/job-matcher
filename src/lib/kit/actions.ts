@@ -5,18 +5,32 @@ import { z } from "zod";
 import { generateKitForJob, type KitOutcome } from "@/lib/kit/pipeline";
 import { angle } from "@/lib/kit/schema";
 import { supabase } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth/session";
+import { getProfile } from "@/lib/cv/queries";
+
+// Kit mutations verify the kit belongs to the caller's profile.
+async function ownedKit(kitId: string): Promise<{ profileId: string } | null> {
+  const user = await requireUser();
+  const profile = await getProfile(user.id);
+  if (!profile) return null;
+  const { data } = await supabase.from("application_kit").select("id").eq("id", kitId).eq("profile_id", profile.id).maybeSingle();
+  return data ? { profileId: profile.id } : null;
+}
 
 export type GenerateState = { status: "idle" } | KitOutcome;
 
 export async function generateKitAction(_prev: GenerateState, formData: FormData): Promise<GenerateState> {
   const jobId = String(formData.get("job_id") ?? "");
   if (!jobId) return { status: "failed", error: "missing job id" };
+  const user = await requireUser();
+  const profile = await getProfile(user.id);
+  if (!profile) return { status: "skipped", reason: "no_profile" };
   const name = String(formData.get("recipient_name") ?? "").trim();
   const role = String(formData.get("recipient_role") ?? "").trim();
   const channel = z.enum(["email", "linkedin", "form", "other"]).safeParse(formData.get("channel"));
   const requested = angle.safeParse(formData.get("angle"));
   const recipient = name ? { name, role: role || null, channel: channel.success ? channel.data : ("email" as const) } : null;
-  const outcome = await generateKitForJob(jobId, { recipient, angle: requested.success ? requested.data : null });
+  const outcome = await generateKitForJob(jobId, profile.id, { recipient, angle: requested.success ? requested.data : null });
   revalidatePath(`/jobs/${jobId}`);
   revalidatePath(`/jobs/${jobId}/kit`);
   return outcome;
@@ -29,6 +43,7 @@ export async function setChangeAccepted(formData: FormData): Promise<void> {
   const index = Number(formData.get("index"));
   const accepted = formData.get("accepted") === "1";
   const jobId = String(formData.get("job_id") ?? "");
+  if (!(await ownedKit(kitId))) return;
   const { data } = await supabase.from("application_kit").select("cv_changes").eq("id", kitId).single();
   if (!data) return;
   const changes = (data.cv_changes as { accepted: boolean | null }[]).map((c, i) => (i === index ? { ...c, accepted } : c));
@@ -43,6 +58,7 @@ export async function saveKitText(formData: FormData): Promise<void> {
   const jobId = String(formData.get("job_id") ?? "");
   const cover = String(formData.get("cover_letter") ?? "");
   const outreach = formData.get("outreach_body");
+  if (!(await ownedKit(kitId))) return;
   const { data } = await supabase.from("application_kit").select("cover_letter, outreach_body").eq("id", kitId).single();
   if (!data) return;
   const edited = cover !== data.cover_letter || (outreach != null && String(outreach) !== (data.outreach_body ?? ""));
@@ -60,6 +76,7 @@ export async function markSent(formData: FormData): Promise<void> {
   const kitId = String(formData.get("kit_id") ?? "");
   const jobId = String(formData.get("job_id") ?? "");
   const body = String(formData.get("final_sent_body") ?? "");
+  if (!(await ownedKit(kitId))) return;
   const now = new Date().toISOString();
   const kit = await supabase
     .from("application_kit")

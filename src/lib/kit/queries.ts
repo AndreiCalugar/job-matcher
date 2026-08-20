@@ -3,11 +3,12 @@ import { z } from "zod";
 import { KIT_COLUMNS, kitRow, type KitRow } from "@/lib/kit/schema";
 import { supabase } from "@/lib/supabase/server";
 
-export async function getLatestKit(jobId: string): Promise<KitRow | null> {
+export async function getLatestKit(jobId: string, profileId: string): Promise<KitRow | null> {
   const { data, error } = await supabase
     .from("application_kit")
     .select(KIT_COLUMNS)
     .eq("job_id", jobId)
+    .eq("profile_id", profileId)
     .order("generated_at", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -15,8 +16,8 @@ export async function getLatestKit(jobId: string): Promise<KitRow | null> {
   return data ? kitRow.parse(data) : null;
 }
 
-export async function getKit(kitId: string): Promise<KitRow | null> {
-  const { data, error } = await supabase.from("application_kit").select(KIT_COLUMNS).eq("id", kitId).maybeSingle();
+export async function getKit(kitId: string, profileId: string): Promise<KitRow | null> {
+  const { data, error } = await supabase.from("application_kit").select(KIT_COLUMNS).eq("id", kitId).eq("profile_id", profileId).maybeSingle();
   if (error) throw new Error(`getKit: ${error.message}`);
   return data ? kitRow.parse(data) : null;
 }

@@ -4,12 +4,24 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { detectAts } from "@/lib/ingest/detect";
 import { getProfile } from "@/lib/cv/queries";
+import { requireUser } from "@/lib/auth/session";
 import { supabase } from "@/lib/supabase/server";
+
+async function currentProfileId(): Promise<string | null> {
+  const user = await requireUser();
+  return (await getProfile(user.id))?.id ?? null;
+}
+
+async function subscribe(profileId: string, sourceId: string) {
+  await supabase.from("source_subscription").upsert({ profile_id: profileId, source_id: sourceId }, { onConflict: "profile_id,source_id" });
+}
 
 export type AddSourceState = { status: "idle" } | { status: "added"; kind: string; identifier: string } | { status: "error"; message: string };
 
 // Paste a careers URL → detect platform → company + source rows.
 export async function addCompanySource(_prev: AddSourceState, formData: FormData): Promise<AddSourceState> {
+  const profileId = await currentProfileId();
+  if (!profileId) return { status: "error", message: "Add your CV first." };
   const url = String(formData.get("url") ?? "").trim();
   const nameInput = String(formData.get("name") ?? "").trim();
   const det = detectAts(url);
@@ -26,8 +38,11 @@ export async function addCompanySource(_prev: AddSourceState, formData: FormData
   if (company.error) return { status: "error", message: company.error.message };
   const src = await supabase
     .from("source")
-    .upsert({ kind: det.kind, identifier: det.identifier, company_id: company.data.id, enabled: true }, { onConflict: "kind,identifier" });
+    .upsert({ kind: det.kind, identifier: det.identifier, company_id: company.data.id, enabled: true }, { onConflict: "kind,identifier" })
+    .select("id")
+    .single();
   if (src.error) return { status: "error", message: src.error.message };
+  await subscribe(profileId, src.data.id);
   revalidatePath("/sources");
   return { status: "added", kind: det.kind, identifier: det.identifier };
 }
@@ -37,30 +52,33 @@ const aggregatorInput = z.object({
   identifier: z.string().trim().default(""),
 });
 export async function addAggregatorSource(_prev: AddSourceState, formData: FormData): Promise<AddSourceState> {
+  const profileId = await currentProfileId();
+  if (!profileId) return { status: "error", message: "Add your CV first." };
   const parsed = aggregatorInput.safeParse({ kind: formData.get("kind"), identifier: formData.get("identifier") });
   if (!parsed.success) return { status: "error", message: "Pick an aggregator." };
   const { kind } = parsed.data;
   const identifier = parsed.data.identifier || (kind === "jobicy" ? "react,typescript,node" : "all");
   const config = kind === "jobicy" ? { geo: "europe" } : kind === "arbeitnow" ? { pages: 5 } : {};
-  const { error } = await supabase.from("source").upsert({ kind, identifier, config, enabled: true }, { onConflict: "kind,identifier" });
+  const { data, error } = await supabase.from("source").upsert({ kind, identifier, config, enabled: true }, { onConflict: "kind,identifier" }).select("id").single();
   if (error) return { status: "error", message: error.message };
+  await subscribe(profileId, data.id);
   revalidatePath("/sources");
   return { status: "added", kind, identifier };
 }
 
+// Shared feeds: a user can only unsubscribe. A feed with no subscribers
+// left is disabled so the cron stops polling it.
 export async function setSourceEnabled(formData: FormData): Promise<void> {
-  const id = String(formData.get("id") ?? "");
-  const enabled = formData.get("enabled") === "1";
-  await supabase.from("source").update({ enabled }).eq("id", id);
-  revalidatePath("/sources");
+  await deleteSource(formData);
 }
 
 export async function deleteSource(formData: FormData): Promise<void> {
+  const profileId = await currentProfileId();
   const id = String(formData.get("id") ?? "");
-  // Jobs reference source with ON DELETE RESTRICT (Phase 1): disable instead of delete when it has jobs.
-  const { count } = await supabase.from("job").select("id", { count: "exact", head: true }).eq("source_id", id);
-  if ((count ?? 0) > 0) await supabase.from("source").update({ enabled: false }).eq("id", id);
-  else await supabase.from("source").delete().eq("id", id);
+  if (!profileId || !id) return;
+  await supabase.from("source_subscription").delete().eq("profile_id", profileId).eq("source_id", id);
+  const { count } = await supabase.from("source_subscription").select("source_id", { count: "exact", head: true }).eq("source_id", id);
+  if ((count ?? 0) === 0) await supabase.from("source").update({ enabled: false }).eq("id", id);
   revalidatePath("/sources");
 }
 
@@ -82,7 +100,8 @@ const spInput = z.object({
 export type SaveSearchState = { status: "idle" } | { status: "saved" } | { status: "error"; message: string };
 
 export async function saveSearchProfile(_prev: SaveSearchState, formData: FormData): Promise<SaveSearchState> {
-  const profile = await getProfile();
+  const user = await requireUser();
+  const profile = await getProfile(user.id);
   if (!profile) return { status: "error", message: "Add your CV first; search profiles belong to a profile." };
   const parsed = spInput.safeParse({
     id: formData.get("id") || undefined,
@@ -102,7 +121,7 @@ export async function saveSearchProfile(_prev: SaveSearchState, formData: FormDa
   }
   const { id, ...row } = parsed.data;
   const q = id
-    ? supabase.from("search_profile").update(row).eq("id", id)
+    ? supabase.from("search_profile").update(row).eq("id", id).eq("profile_id", profile.id)
     : supabase.from("search_profile").insert({ ...row, profile_id: profile.id });
   const { error } = await q;
   if (error) return { status: "error", message: error.message };
@@ -111,7 +130,9 @@ export async function saveSearchProfile(_prev: SaveSearchState, formData: FormDa
 }
 
 export async function deleteSearchProfile(formData: FormData): Promise<void> {
+  const profileId = await currentProfileId();
   const id = String(formData.get("id") ?? "");
-  await supabase.from("search_profile").delete().eq("id", id);
+  if (!profileId) return;
+  await supabase.from("search_profile").delete().eq("id", id).eq("profile_id", profileId);
   revalidatePath("/search");
 }

@@ -1,4 +1,6 @@
 import { Shell } from "@/components/shell";
+import { requireUser } from "@/lib/auth/session";
+import { getProfile } from "@/lib/cv/queries";
 import { SearchProfileForm } from "@/components/ingest/search-profile-form";
 import { Button } from "@/components/ui/button";
 import { deleteSearchProfile } from "@/lib/ingest/actions";
@@ -9,7 +11,9 @@ export const dynamic = "force-dynamic";
 // Saved, reusable criteria (CLAUDE.md "Onboarding §4"). They do not fetch
 // anything; they decide which ingested postings deserve a scoring call.
 export default async function SearchPage() {
-  const profiles = await listSearchProfiles();
+  const user = await requireUser();
+  const profile = await getProfile(user.id);
+  const profiles = profile ? await listSearchProfiles(profile.id) : [];
   return (
     <Shell current="search">
       <h1 className="font-display text-display font-semibold text-ink">Search profiles</h1>

@@ -4,6 +4,7 @@ import { Shell } from "@/components/shell";
 import { Badge } from "@/components/jobs/jobs-table";
 import { UploadForm } from "@/components/profile/upload-form";
 import { getProfile } from "@/lib/cv/queries";
+import { requireUser } from "@/lib/auth/session";
 import { formatDate } from "@/lib/jobs/format";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +12,8 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 export default async function ProfilePage() {
-  const profile = await getProfile();
+  const user = await requireUser();
+  const profile = await getProfile(user.id);
 
   if (!profile) {
     return (

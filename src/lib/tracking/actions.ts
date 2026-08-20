@@ -3,6 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth/session";
+import { getProfile } from "@/lib/cv/queries";
+
+async function ownedApplication(id: string): Promise<boolean> {
+  const user = await requireUser();
+  const profile = await getProfile(user.id);
+  if (!profile) return false;
+  const { data } = await supabase.from("application").select("id").eq("id", id).eq("profile_id", profile.id).maybeSingle();
+  return !!data;
+}
 import { TERMINAL, daysBetween, responseKind, status } from "@/lib/tracking/schema";
 
 // Status change = the user logging what happened. Moving past 'applied'
@@ -13,6 +23,7 @@ export async function setApplicationStatus(formData: FormData): Promise<void> {
   const id = z.string().uuid().parse(formData.get("id"));
   const next = status.parse(formData.get("status"));
   const kindInput = responseKind.safeParse(formData.get("response_kind"));
+  if (!(await ownedApplication(id))) return;
   const { data: cur } = await supabase.from("application").select("status, sent_at, first_response_at").eq("id", id).single();
   if (!cur) return;
 
@@ -40,6 +51,7 @@ export async function setApplicationStatus(formData: FormData): Promise<void> {
 export async function saveApplicationNotes(formData: FormData): Promise<void> {
   const id = z.string().uuid().parse(formData.get("id"));
   const notes = String(formData.get("notes") ?? "").trim() || null;
+  if (!(await ownedApplication(id))) return;
   await supabase.from("application").update({ notes, updated_at: new Date().toISOString() }).eq("id", id);
   revalidatePath("/applications");
 }

@@ -11,6 +11,7 @@ import { PARSER_VERSION } from "@/lib/parse/job-parser";
 import { parseStoredJob } from "@/lib/parse/pipeline";
 import { supabase } from "@/lib/supabase/server";
 import { shouldGhost } from "@/lib/tracking/stats";
+import { listReviewedProfileIds } from "@/lib/cv/queries";
 
 // The unattended loop. Runs from GitHub Actions on a schedule and from
 // `npm run ingest` locally. Every stage survives one bad item: a source
@@ -161,38 +162,42 @@ export async function runIngest(opts: RunOptions = {}): Promise<RunReport> {
   }
   log(`parsed ${report.parsed}, failed ${report.parseFailed}`);
 
-  // ---- 3. score what the search profiles say is worth scoring --------------
-  const { data: spData } = await supabase.from("search_profile").select("*").eq("enabled", true);
-  const profiles = z.array(searchProfileRow).parse(spData ?? []);
-  if (profiles.length === 0) {
-    log("no enabled search profile — nothing auto-scored");
-    return report;
-  }
-  const scoreCap = opts.scoreCap ?? 25;
+  // ---- 3. score, per reviewed profile, what its search profiles allow ------
+  // Shared feed jobs only; each user's manual pastes are scored on paste.
+  const scoreCap = opts.scoreCap ?? 25; // per profile per run
   const { data: candidates } = await supabase
     .from("job")
     .select(JOB_ROW_COLUMNS)
     .not("parsed_at", "is", null)
     .is("closed_at", null)
+    .is("owner_profile_id", null)
     .order("first_seen", { ascending: false })
     .limit(400);
-  const { data: scoredRows } = await supabase.from("match").select("job_id").eq("prompt_version", MATCH_PROMPT);
-  const already = new Set((scoredRows ?? []).map((m) => m.job_id));
-  let budget = scoreCap;
-  for (const raw of candidates ?? []) {
-    if (budget <= 0) break;
-    const job = jobRow.parse(raw);
-    if (already.has(job.id)) continue;
-    if (!passesAny({ ...job, text: job.raw.text }, profiles)) {
-      report.scoreSkippedByFilter++;
+  const jobs = (candidates ?? []).map((r) => jobRow.parse(r));
+
+  for (const profileId of await listReviewedProfileIds()) {
+    const { data: spData } = await supabase.from("search_profile").select("*").eq("enabled", true).eq("profile_id", profileId);
+    const profiles = z.array(searchProfileRow).parse(spData ?? []);
+    if (profiles.length === 0) {
+      log(`profile ${profileId.slice(0, 8)}: no enabled search profile — nothing auto-scored`);
       continue;
     }
-    const r = await scoreStoredJob(job.id);
-    if (r.status === "scored") { report.scored++; budget--; }
-    else if (r.status === "failed") report.scoreFailed++;
-    else if (r.status === "skipped") { log(`scoring skipped: ${r.reason}`); break; }
+    const { data: scoredRows } = await supabase.from("match").select("job_id").eq("prompt_version", MATCH_PROMPT).eq("profile_id", profileId);
+    const already = new Set((scoredRows ?? []).map((m) => m.job_id));
+    let budget = scoreCap;
+    let scored = 0, skipped = 0, failed = 0;
+    for (const job of jobs) {
+      if (budget <= 0) break;
+      if (already.has(job.id)) continue;
+      if (!passesAny({ ...job, text: job.raw.text }, profiles)) { skipped++; continue; }
+      const r = await scoreStoredJob(job.id, profileId);
+      if (r.status === "scored") { scored++; budget--; }
+      else if (r.status === "failed") failed++;
+      else if (r.status === "skipped") { log(`profile ${profileId.slice(0, 8)}: scoring skipped: ${r.reason}`); break; }
+    }
+    report.scored += scored; report.scoreSkippedByFilter += skipped; report.scoreFailed += failed;
+    log(`profile ${profileId.slice(0, 8)}: scored ${scored}, skipped by filter ${skipped}, failed ${failed}`);
   }
-  log(`scored ${report.scored}, skipped by filter ${report.scoreSkippedByFilter}, failed ${report.scoreFailed}`);
   return report;
 }
 

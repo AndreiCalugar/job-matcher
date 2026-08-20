@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { signOut } from "@/lib/auth/actions";
+import { getUser } from "@/lib/auth/session";
 
 const NAV = [
   { href: "/", label: "Jobs", key: "jobs" },
@@ -8,11 +10,13 @@ const NAV = [
   { href: "/profile", label: "Profile", key: "profile" },
   { href: "/search", label: "Search profiles", key: "search" },
   { href: "/sources", label: "Sources", key: "sources" },
+  { href: "/account", label: "Account", key: "account" },
 ] as const;
 export type NavKey = (typeof NAV)[number]["key"];
 
 // DESIGN.md §5: fixed 220px monochrome rail, fluid workspace.
-export function Shell({ children, current }: { children: ReactNode; current: NavKey }) {
+export async function Shell({ children, current }: { children: ReactNode; current: NavKey }) {
+  const user = await getUser();
   return (
     <div className="flex min-h-full flex-1">
       <aside className="hidden w-[220px] shrink-0 flex-col border-r border-rule bg-surface md:flex">
@@ -31,6 +35,14 @@ export function Shell({ children, current }: { children: ReactNode; current: Nav
             </Link>
           ))}
         </nav>
+        {user ? (
+          <div className="mt-auto border-t border-rule px-4 py-3">
+            <p className="truncate font-mono text-micro text-graphite" title={user.email ?? ""}>{user.email}</p>
+            <form action={signOut}>
+              <button type="submit" className="mt-1 text-small text-graphite hover:text-ink">Sign out</button>
+            </form>
+          </div>
+        ) : null}
       </aside>
       <main className="min-w-0 flex-1">
         <div className="mx-auto max-w-[1440px] px-4 py-6 md:px-6">{children}</div>

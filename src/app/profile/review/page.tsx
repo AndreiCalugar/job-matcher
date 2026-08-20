@@ -3,11 +3,13 @@ import { z } from "zod";
 import { Shell } from "@/components/shell";
 import { ProfileEditor } from "@/components/profile/profile-editor";
 import { getProfile } from "@/lib/cv/queries";
+import { requireUser } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
 export default async function ReviewPage({ searchParams }: { searchParams: Promise<{ gaps?: string }> }) {
-  const profile = await getProfile();
+  const user = await requireUser();
+  const profile = await getProfile(user.id);
   if (!profile) redirect("/profile");
 
   const { gaps: raw } = await searchParams;

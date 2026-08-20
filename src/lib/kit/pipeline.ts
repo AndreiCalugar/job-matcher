@@ -1,6 +1,6 @@
 import "@/lib/server-guard";
 import Anthropic from "@anthropic-ai/sdk";
-import { getProfile } from "@/lib/cv/queries";
+import { getProfileById } from "@/lib/cv/queries";
 import { getJob } from "@/lib/jobs/queries";
 import { atsExport } from "@/lib/kit/ats-export";
 import { deterministicGate, gatePassed, type Issue } from "@/lib/kit/gate";
@@ -25,12 +25,13 @@ export type KitOutcome =
 // reasons. Blocked, not warned (CLAUDE.md "Anti-fabrication gate").
 export async function generateKitForJob(
   jobId: string,
+  profileId: string,
   input: { recipient: Recipient; angle: Angle | null },
 ): Promise<KitOutcome> {
-  const profile = await getProfile();
+  const profile = await getProfileById(profileId);
   if (!profile) return { status: "skipped", reason: "no_profile" };
   if (!profile.human_corrected) return { status: "skipped", reason: "profile_unreviewed" };
-  const [job, match] = await Promise.all([getJob(jobId), getMatchForJob(jobId)]);
+  const [job, match] = await Promise.all([getJob(jobId, profile.id), getMatchForJob(jobId, profile.id)]);
   if (!job || !job.parsed_at || !match) return { status: "skipped", reason: "no_match" };
 
   const profileEdit = {
@@ -46,7 +47,7 @@ export async function generateKitForJob(
 
   try {
     const gen = await generateKit(getClient(), profileEdit, jobForMatch, match, input.recipient, input.angle);
-    await meter("kit_generated", jobId, gen.model, gen.usage);
+    await meter("kit_generated", jobId, gen.model, gen.usage, profile.id);
 
     const det = deterministicGate(profileEdit, gen.kit, job.raw.text, {
       allowTerms: [input.recipient?.name, input.recipient?.role].filter((t): t is string => !!t),
@@ -58,7 +59,7 @@ export async function generateKitForJob(
       const v = await verifyKitText(getClient(), profileEdit, { cover_letter: gen.kit.cover_letter, outreach_body: gen.kit.outreach_body }, job.raw.text);
       verifierIssues = v.issues;
       verifierModel = v.model;
-      await meter("kit_generated", jobId, v.model, v.usage);
+      await meter("kit_generated", jobId, v.model, v.usage, profile.id);
     }
     const issues = [...det, ...verifierIssues];
 
@@ -108,9 +109,9 @@ export async function generateKitForJob(
   }
 }
 
-async function meter(kind: "kit_generated", jobId: string, model: string, u: { input_tokens: number; output_tokens: number; cache_read_tokens: number; cache_creation_tokens: number; latency_ms: number }) {
+async function meter(kind: "kit_generated", jobId: string, model: string, u: { input_tokens: number; output_tokens: number; cache_read_tokens: number; cache_creation_tokens: number; latency_ms: number }, profileId?: string) {
   await supabase.from("usage_event").insert({
-    kind, job_id: jobId, model,
+    kind, job_id: jobId, model, profile_id: profileId ?? null,
     input_tokens: u.input_tokens, output_tokens: u.output_tokens,
     cache_read_tokens: u.cache_read_tokens, cache_creation_tokens: u.cache_creation_tokens, latency_ms: u.latency_ms,
   });

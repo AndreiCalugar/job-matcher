@@ -1,6 +1,6 @@
 import "@/lib/server-guard";
 import Anthropic from "@anthropic-ai/sdk";
-import { getProfile } from "@/lib/cv/queries";
+import { getProfileById } from "@/lib/cv/queries";
 import { getJob } from "@/lib/jobs/queries";
 import { ToolCallError, type MessagesClient } from "@/lib/llm/tool-call";
 import { verdictFor } from "@/lib/match/bands";
@@ -20,12 +20,12 @@ export type ScoreOutcome =
 // (job, profile, prompt_version): a given pairing is scored once per prompt
 // version, ever. Refuses to run against an unreviewed profile — the review
 // screen is not optional.
-export async function scoreStoredJob(jobId: string, opts?: { force?: boolean }): Promise<ScoreOutcome> {
-  const profile = await getProfile();
+export async function scoreStoredJob(jobId: string, profileId: string, opts?: { force?: boolean }): Promise<ScoreOutcome> {
+  const profile = await getProfileById(profileId);
   if (!profile) return { status: "skipped", reason: "no_profile" };
   if (!profile.human_corrected) return { status: "skipped", reason: "profile_unreviewed" };
 
-  const job = await getJob(jobId);
+  const job = await getJob(jobId, profile.id);
   if (!job || !job.parsed_at) return { status: "skipped", reason: "job_unparsed" };
 
   if (!opts?.force) {
@@ -92,6 +92,7 @@ export async function scoreStoredJob(jobId: string, opts?: { force?: boolean }):
 
     await supabase.from("usage_event").insert({
       kind: "match_scored",
+      profile_id: profile.id,
       job_id: jobId,
       model: result.model,
       input_tokens: result.usage.input_tokens,

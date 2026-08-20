@@ -11,11 +11,13 @@
     "typecheck": "tsc --noEmit",
     "eval": "tsx evals/run.ts",
     "eval:fetch": "tsx evals/fetch.ts",
-    "ingest": "tsx scripts/ingest.ts"
+    "ingest": "tsx scripts/ingest.ts",
+    "claim": "tsx scripts/claim-orphans.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0",
     "@base-ui/react": "^1.7.0",
+    "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
     "@vercel/analytics": "^2.0.1",
     "class-variance-authority": "^0.7.1",

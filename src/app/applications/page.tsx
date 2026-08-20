@@ -7,13 +7,17 @@ import { verdictFor } from "@/lib/match/bands";
 import { formatDate } from "@/lib/jobs/format";
 import { daysBetween } from "@/lib/tracking/schema";
 import { listApplications } from "@/lib/tracking/queries";
+import { requireUser } from "@/lib/auth/session";
+import { getProfile } from "@/lib/cv/queries";
 import { statusCounts } from "@/lib/tracking/stats";
 
 export const dynamic = "force-dynamic";
 
 // The pipeline. Ghosted is a first-class state, not a gap in the data.
 export default async function ApplicationsPage() {
-  const apps = await listApplications();
+  const user = await requireUser();
+  const profile = await getProfile(user.id);
+  const apps = profile ? await listApplications(profile.id) : [];
   const counts = statusCounts(apps);
   const now = new Date().toISOString();
   return (

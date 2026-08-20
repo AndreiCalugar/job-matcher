@@ -10,6 +10,7 @@ import { getParseFailures } from "@/lib/parse/queries";
 import { getProfile } from "@/lib/cv/queries";
 import { getMatchForJob } from "@/lib/match/queries";
 import { MatchPanel } from "@/components/match/match-panel";
+import { requireUser } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -18,12 +19,13 @@ export const maxDuration = 120;
 // Red flags are content, rendered at body size in ink (DESIGN.md §7).
 export default async function JobPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const job = await getJob(id);
+  const user = await requireUser();
+  const profile = await getProfile(user.id);
+  const job = await getJob(id, profile?.id ?? null);
   if (!job) notFound();
-  const [failures, profile, match] = await Promise.all([
+  const [failures, match] = await Promise.all([
     job.parsed_at ? Promise.resolve([]) : getParseFailures(id),
-    getProfile(),
-    getMatchForJob(id),
+    profile ? getMatchForJob(id, profile.id) : Promise.resolve(null),
   ]);
   const canScore = !!profile?.human_corrected && !!job.parsed_at;
 

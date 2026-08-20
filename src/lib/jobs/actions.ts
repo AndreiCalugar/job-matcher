@@ -6,6 +6,8 @@ import { contentHash } from "@/lib/jobs/hash";
 import { MANUAL_SOURCE_ID, pasteInput, type ManualRaw } from "@/lib/jobs/schema";
 import { parseStoredJob } from "@/lib/parse/pipeline";
 import { scoreStoredJob } from "@/lib/match/pipeline";
+import { requireUser } from "@/lib/auth/session";
+import { getProfile } from "@/lib/cv/queries";
 
 export type PasteState =
   | { status: "idle" }
@@ -20,6 +22,8 @@ export async function storePastedJob(
   _prev: PasteState,
   formData: FormData,
 ): Promise<PasteState> {
+  const user = await requireUser();
+  const profile = await getProfile(user.id);
   const parsed = pasteInput.safeParse({
     text: formData.get("text"),
     url: formData.get("url"),
@@ -39,11 +43,14 @@ export async function storePastedJob(
   // the content hash, so the unique constraint would reject a duplicate
   // anyway — but reading first lets us tell the user it already exists and
   // bump last_seen instead of surfacing a constraint error.
+  // Idempotent per owner: the same text pasted by two users is two rows,
+  // each private to its owner. external_id carries the owner for that.
+  const externalId = profile ? `${profile.id}:${hash}` : hash;
   const existing = await supabase
     .from("job")
     .select("id, first_seen")
     .eq("source_id", MANUAL_SOURCE_ID)
-    .eq("external_id", hash)
+    .eq("external_id", externalId)
     .maybeSingle();
 
   if (existing.error) {
@@ -66,7 +73,8 @@ export async function storePastedJob(
     .from("job")
     .insert({
       source_id: MANUAL_SOURCE_ID,
-      external_id: hash,
+      owner_profile_id: profile?.id ?? null,
+      external_id: externalId,
       content_hash: hash,
       url: url ?? null,
       raw,
@@ -83,7 +91,7 @@ export async function storePastedJob(
   const outcome = await parseStoredJob(inserted.data.id);
   // Then score, if there is a reviewed profile. Skips silently otherwise;
   // the list shows why.
-  if (outcome.status !== "failed") await scoreStoredJob(inserted.data.id);
+  if (outcome.status !== "failed" && profile) await scoreStoredJob(inserted.data.id, profile.id);
   revalidatePath("/");
   return {
     status: "stored",

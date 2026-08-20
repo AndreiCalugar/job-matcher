@@ -1,4 +1,6 @@
 import { Shell } from "@/components/shell";
+import { requireUser } from "@/lib/auth/session";
+import { getProfile } from "@/lib/cv/queries";
 import { Badge } from "@/components/jobs/jobs-table";
 import { AddAggregatorForm, AddCompanyForm } from "@/components/ingest/source-forms";
 import { Button } from "@/components/ui/button";
@@ -10,7 +12,9 @@ export const dynamic = "force-dynamic";
 // Run log + subscriptions. Know a feed broke without discovering it three
 // weeks later (CLAUDE.md "Failure discipline").
 export default async function SourcesPage() {
-  const sources = await listSources();
+  const user = await requireUser();
+  const profile = await getProfile(user.id);
+  const sources = profile ? await listSources(profile.id) : [];
   return (
     <Shell current="sources">
       <h1 className="font-display text-display font-semibold text-ink">Sources</h1>

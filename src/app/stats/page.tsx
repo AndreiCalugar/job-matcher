@@ -1,6 +1,8 @@
 import { Shell } from "@/components/shell";
 import { CalibrationChart } from "@/components/tracking/calibration-chart";
 import { listApplications, listMatchGaps } from "@/lib/tracking/queries";
+import { requireUser } from "@/lib/auth/session";
+import { getProfile } from "@/lib/cv/queries";
 import { calibration, gapFrequency, medianDaysToResponse, rateBy, volumeByWeek } from "@/lib/tracking/stats";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +10,9 @@ export const dynamic = "force-dynamic";
 // Statistics: the part a chat window cannot replace. Every number here is
 // a plain aggregation over the user's own tracked applications.
 export default async function StatsPage() {
-  const [apps, matchGaps] = await Promise.all([listApplications(), listMatchGaps()]);
+  const user = await requireUser();
+  const profile = await getProfile(user.id);
+  const [apps, matchGaps] = profile ? await Promise.all([listApplications(profile.id), listMatchGaps(profile.id)]) : [[], []];
   const bands = calibration(apps);
   const byAngle = rateBy(apps, (a) => a.angle);
   const bySource = rateBy(apps, (a) => a.job.source?.kind ?? null);

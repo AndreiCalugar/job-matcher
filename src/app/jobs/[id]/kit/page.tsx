@@ -8,6 +8,7 @@ import { getProfile } from "@/lib/cv/queries";
 import { getJob } from "@/lib/jobs/queries";
 import { getLatestKit, getRecentBlocks } from "@/lib/kit/queries";
 import { getMatchForJob } from "@/lib/match/queries";
+import { requireUser } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 // Generate (strong tier) + verify (cheap tier) in one action.
@@ -15,8 +16,13 @@ export const maxDuration = 180;
 
 export default async function KitPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [job, match, profile, kit] = await Promise.all([getJob(id), getMatchForJob(id), getProfile(), getLatestKit(id)]);
+  const user = await requireUser();
+  const profile = await getProfile(user.id);
+  const job = await getJob(id, profile?.id ?? null);
   if (!job) notFound();
+  const [match, kit] = profile
+    ? await Promise.all([getMatchForJob(id, profile.id), getLatestKit(id, profile.id)])
+    : [null, null];
   const blocks = match && !kit ? await getRecentBlocks(match.id) : [];
 
   return (

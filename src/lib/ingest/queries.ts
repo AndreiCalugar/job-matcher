@@ -13,18 +13,22 @@ export const sourceListRow = z.object({
 });
 export type SourceListRow = z.infer<typeof sourceListRow>;
 
-export async function listSources(): Promise<SourceListRow[]> {
+// Feeds are shared rows; a user sees the ones they subscribed to.
+export async function listSources(profileId: string): Promise<SourceListRow[]> {
+  const subs = await supabase.from("source_subscription").select("source_id").eq("profile_id", profileId);
+  const ids = (subs.data ?? []).map((s) => s.source_id);
+  if (ids.length === 0) return [];
   const { data, error } = await supabase
     .from("source")
     .select("id, kind, identifier, enabled, config, last_run_at, last_run_status, last_error, last_run_new, last_run_seen, created_at, company:company_id(name)")
-    .neq("kind", "manual")
+    .in("id", ids)
     .order("created_at", { ascending: false });
   if (error) throw new Error(`listSources: ${error.message}`);
   return z.array(sourceListRow).parse(data);
 }
 
-export async function listSearchProfiles(): Promise<SearchProfileRow[]> {
-  const { data, error } = await supabase.from("search_profile").select("*").order("created_at");
+export async function listSearchProfiles(profileId: string): Promise<SearchProfileRow[]> {
+  const { data, error } = await supabase.from("search_profile").select("*").eq("profile_id", profileId).order("created_at");
   if (error) throw new Error(`listSearchProfiles: ${error.message}`);
   return z.array(searchProfileRow).parse(data);
 }
