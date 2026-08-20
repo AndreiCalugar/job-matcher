@@ -1,4 +1,4 @@
-import "server-only";
+import "@/lib/server-guard";
 import { supabase } from "@/lib/supabase/server";
 import { profileRow, type ProfileRow } from "@/lib/cv/schema";
 

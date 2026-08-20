@@ -1,4 +1,4 @@
-import "server-only";
+import "@/lib/server-guard";
 import { createClient } from "@supabase/supabase-js";
 import { env } from "@/lib/env";
 

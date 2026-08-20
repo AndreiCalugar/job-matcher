@@ -1,4 +1,4 @@
-import "server-only";
+import "@/lib/server-guard";
 import { z } from "zod";
 import { KIT_COLUMNS, kitRow, type KitRow } from "@/lib/kit/schema";
 import { supabase } from "@/lib/supabase/server";

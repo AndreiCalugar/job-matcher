@@ -21,22 +21,28 @@ export const pasteInput = z.object({
 });
 export type PasteInput = z.infer<typeof pasteInput>;
 
-// Shape of job.raw for source.kind = 'manual'. Phase 2's parser reads this.
-// Versioned so a later change to the shape does not silently break re-parses.
-export const manualRaw = z.object({
-  kind: z.literal("manual"),
+// Shape of job.raw. Every source writes the same envelope: the plain text
+// the parser reads, the URL, and (for feeds) the native payload verbatim.
+// Versioned so a later change to the shape does not silently break
+// re-parses.
+export const jobRaw = z.object({
+  kind: z.string(),            // source kind: 'manual' | 'greenhouse' | ...
   v: z.literal(1),
   text: z.string(),
   url: z.string().url().optional(),
+  payload: z.unknown().optional(),
 });
-export type ManualRaw = z.infer<typeof manualRaw>;
+export type JobRaw = z.infer<typeof jobRaw>;
+/** @deprecated alias kept for the Phase 1–2 call sites */
+export const manualRaw = jobRaw;
+export type ManualRaw = JobRaw;
 
 // The row as read back for the list. Zod here too: the DB is a boundary.
 // Parsed fields are nullable: null until Phase 2's parser has run.
 export const jobRow = z.object({
   id: z.string().uuid(),
   url: z.string().nullable(),
-  raw: manualRaw,
+  raw: jobRaw,
   content_hash: z.string(),
   first_seen: z.string(),
   last_seen: z.string(),

@@ -1,4 +1,4 @@
-import "server-only";
+import "@/lib/server-guard";
 import { z } from "zod";
 import { MATCH_COLUMNS, matchRow, type MatchRow } from "@/lib/match/schema";
 import { PROMPT_VERSION } from "@/lib/match/matcher";

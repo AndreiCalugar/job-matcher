@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 const NAV = [
   { href: "/", label: "Jobs", key: "jobs" },
   { href: "/profile", label: "Profile", key: "profile" },
+  { href: "/search", label: "Search profiles", key: "search" },
+  { href: "/sources", label: "Sources", key: "sources" },
 ] as const;
 export type NavKey = (typeof NAV)[number]["key"];
 

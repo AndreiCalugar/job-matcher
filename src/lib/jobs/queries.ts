@@ -1,4 +1,4 @@
-import "server-only";
+import "@/lib/server-guard";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase/server";
 import { JOB_ROW_COLUMNS, jobRow, type JobRow } from "@/lib/jobs/schema";
@@ -9,8 +9,10 @@ export async function listJobs(): Promise<JobRow[]> {
   const { data, error } = await supabase
     .from("job")
     .select(JOB_ROW_COLUMNS)
+    // Closed = vanished from its feed. Kept for history, out of the queue.
+    .is("closed_at", null)
     .order("first_seen", { ascending: false })
-    .limit(200);
+    .limit(300);
   if (error) throw new Error(`listJobs: ${error.message}`);
   // A row that fails the schema is a bug in our writer, not bad user input —
   // fail loudly so it is seen in Phase 1 rather than silently dropped.

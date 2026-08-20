@@ -1,4 +1,4 @@
-import "server-only";
+import "@/lib/server-guard";
 import { extractText, getDocumentProxy } from "unpdf";
 import { normalise } from "@/lib/cv/normalise";
 

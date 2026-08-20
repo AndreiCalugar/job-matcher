@@ -10,7 +10,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "eval": "tsx evals/run.ts",
-    "eval:fetch": "tsx evals/fetch.ts"
+    "eval:fetch": "tsx evals/fetch.ts",
+    "ingest": "tsx scripts/ingest.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0",

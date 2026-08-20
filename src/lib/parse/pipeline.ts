@@ -1,4 +1,4 @@
-import "server-only";
+import "@/lib/server-guard";
 import Anthropic from "@anthropic-ai/sdk";
 import { supabase } from "@/lib/supabase/server";
 import { manualRaw } from "@/lib/jobs/schema";

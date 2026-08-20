@@ -1,4 +1,4 @@
-import "server-only";
+import "@/lib/server-guard";
 import Anthropic from "@anthropic-ai/sdk";
 import { getProfile } from "@/lib/cv/queries";
 import { getJob } from "@/lib/jobs/queries";
