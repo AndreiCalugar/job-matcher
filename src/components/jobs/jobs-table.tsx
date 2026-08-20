@@ -28,12 +28,12 @@ export function JobsTable({ jobs }: { jobs: JobRow[] }) {
       <Table className="text-small">
         <TableHeader className="sticky top-0 bg-surface [&_tr]:border-b [&_tr]:border-rule-strong">
           <TableRow className="hover:bg-transparent">
-            <TableHead className="eyebrow h-10 w-[112px]">Stored</TableHead>
+            <TableHead className="eyebrow h-10 w-[104px]">Stored</TableHead>
             <TableHead className="eyebrow h-10 w-[88px]">Source</TableHead>
             <TableHead className="eyebrow h-10">Posting</TableHead>
-            <TableHead className="eyebrow h-10 w-[200px]">URL</TableHead>
+            <TableHead className="eyebrow h-10 w-[140px]">URL</TableHead>
             <TableHead className="eyebrow h-10 w-[72px] text-right">Chars</TableHead>
-            <TableHead className="eyebrow h-10 w-[96px]">Hash</TableHead>
+            <TableHead className="eyebrow h-10 w-[88px]">Hash</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

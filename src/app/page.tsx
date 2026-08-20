@@ -20,7 +20,7 @@ export default async function JobsPage() {
 
       {/* DESIGN.md §5: two-pane on desktop, stacked below 1024px. The list
           never collapses below 360px. */}
-      <div className="mt-8 grid gap-6 md:grid-cols-[minmax(360px,1fr)_minmax(320px,420px)]">
+      <div className="mt-8 grid gap-6 md:grid-cols-[minmax(360px,1fr)_minmax(300px,380px)]">
         <section aria-labelledby="list-heading" className="min-w-0 md:order-1">
           <h2 id="list-heading" className="eyebrow mb-2">
             Stored postings
