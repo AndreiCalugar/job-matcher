@@ -28,3 +28,7 @@ Naming: `phase-N-<what>-<theme>.jpg`. Test data only.
 
 ## Phase 7 — tracking + statistics (2026-08-20, local dev)
 - `phase-7-statistics-empty-light.jpg` — the calibration chart with no data yet: the structure is the promise; it fills as applications are sent
+
+## Landing page (2026-08-20, local dev)
+- `landing-hero-light.jpg` / `-dark.jpg` — hero with the example morning queue; the theme toggle in the header
+- `landing-features-light.jpg` — "what you get"

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { signOut } from "@/lib/auth/actions";
 import { getUser } from "@/lib/auth/session";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const NAV = [
   { href: "/", label: "Jobs", key: "jobs" },
@@ -35,8 +36,11 @@ export async function Shell({ children, current }: { children: ReactNode; curren
             </Link>
           ))}
         </nav>
+        <div className="mt-auto border-t border-rule px-4 py-3">
+          <ThemeToggle />
+        </div>
         {user ? (
-          <div className="mt-auto border-t border-rule px-4 py-3">
+          <div className="border-t border-rule px-4 py-3">
             <p className="truncate font-mono text-micro text-graphite" title={user.email ?? ""}>{user.email}</p>
             <form action={signOut}>
               <button type="submit" className="mt-1 text-small text-graphite hover:text-ink">Sign out</button>

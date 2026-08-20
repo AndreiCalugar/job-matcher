@@ -4,7 +4,8 @@ import { PasteForm } from "@/components/jobs/paste-form";
 import { listJobs } from "@/lib/jobs/queries";
 import { getProfile } from "@/lib/cv/queries";
 import { getMatchesByJob } from "@/lib/match/queries";
-import { requireUser } from "@/lib/auth/session";
+import { getUser } from "@/lib/auth/session";
+import { Landing } from "@/components/landing/landing";
 import Link from "next/link";
 
 // Reads on every request: the list must reflect the write that just happened.
@@ -14,7 +15,8 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 export default async function JobsPage() {
-  const user = await requireUser();
+  const user = await getUser();
+  if (!user) return <Landing />;
   const profile = await getProfile(user.id);
   const jobs = await listJobs(profile?.id ?? null);
   const matches = profile ? await getMatchesByJob(jobs.map((j) => j.id), profile.id) : new Map();

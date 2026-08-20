@@ -2,10 +2,10 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Session gate (Phase 8). Refreshes the Supabase session cookie on every
-// request and sends signed-out users to /login. Public: /login,
-// /auth/callback, /privacy. Fail closed: without the public Supabase env
+// request and sends signed-out users to /login. Public: / (landing),
+// /login, /auth/callback, /privacy. Fail closed: without the public Supabase env
 // the app serves 503 rather than open.
-const PUBLIC = [/^\/login$/, /^\/auth\/callback$/, /^\/privacy$/];
+const PUBLIC = [/^\/$/, /^\/login$/, /^\/auth\/callback$/, /^\/privacy$/];
 
 export async function proxy(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
