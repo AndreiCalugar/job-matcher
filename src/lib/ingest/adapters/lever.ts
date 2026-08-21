@@ -6,14 +6,14 @@ const schema = z.array(z.object({
   id: z.string(),
   text: z.string(),
   hostedUrl: z.string(),
-  applyUrl: z.string().optional(),
-  createdAt: z.number().optional(),
+  applyUrl: z.string().nullish(),
+  createdAt: z.number().nullish(),
   categories: z.object({ location: z.string().optional(), team: z.string().optional(), commitment: z.string().optional() }).optional(),
-  descriptionPlain: z.string().optional(),
-  description: z.string().optional(),
+  descriptionPlain: z.string().nullish(),
+  description: z.string().nullish(),
   lists: z.array(z.object({ text: z.string(), content: z.string() })).optional(),
-  additionalPlain: z.string().optional(),
-  workplaceType: z.string().optional(),
+  additionalPlain: z.string().nullish(),
+  workplaceType: z.string().nullish(),
 }));
 
 export const lever: Adapter = {

@@ -7,11 +7,11 @@ const schema = z.object({
     id: z.number(),
     title: z.string(),
     absolute_url: z.string(),
-    updated_at: z.string().optional(),
-    first_published: z.string().optional(),
-    location: z.object({ name: z.string() }).optional(),
-    content: z.string().optional(), // HTML, entity-escaped by Greenhouse
-    company_name: z.string().optional(),
+    updated_at: z.string().nullish(),
+    first_published: z.string().nullish(),
+    location: z.object({ name: z.string() }).nullish(),
+    content: z.string().nullish(), // HTML, entity-escaped by Greenhouse
+    company_name: z.string().nullish(),
   })),
 });
 

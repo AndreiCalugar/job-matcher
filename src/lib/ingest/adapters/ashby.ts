@@ -7,14 +7,15 @@ const schema = z.object({
     id: z.string(),
     title: z.string(),
     jobUrl: z.string(),
-    applyUrl: z.string().optional(),
-    location: z.string().optional(),
-    isRemote: z.boolean().optional(),
-    publishedAt: z.string().optional(),
-    descriptionHtml: z.string().optional(),
-    descriptionPlain: z.string().optional(),
-    employmentType: z.string().optional(),
-    compensation: z.unknown().optional(),
+    // Live boards send null where the docs say optional; accept both.
+    applyUrl: z.string().nullish(),
+    location: z.string().nullish(),
+    isRemote: z.boolean().nullish(),
+    publishedAt: z.string().nullish(),
+    descriptionHtml: z.string().nullish(),
+    descriptionPlain: z.string().nullish(),
+    employmentType: z.string().nullish(),
+    compensation: z.unknown().nullish(),
   })),
 });
 

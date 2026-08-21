@@ -48,10 +48,16 @@ describe("adapters normalise to one shape", () => {
     expect(p!.remote_hint).toBe(false);
     expect(p!.posted_at).toBe("2025-08-01T00:00:00.000Z");
   });
-  it("ashby", async () => {
-    const payload = { jobs: [{ id: "x1", title: "Product Engineer", jobUrl: "https://jobs.ashbyhq.com/linear/x1", isRemote: true, location: "EU", descriptionPlain: "Ship.", publishedAt: "2026-08-10T00:00:00Z" }] };
-    const [p] = await ashby.fetch("linear", {}, fakeHttp(payload));
-    expect(normalisedPosting.parse(p).remote_hint).toBe(true);
+  it("ashby (tolerates nulls the live API sends)", async () => {
+    const payload = { jobs: [
+      { id: "x1", title: "Product Engineer", jobUrl: "https://jobs.ashbyhq.com/linear/x1", isRemote: true, location: "EU", descriptionPlain: "Ship.", publishedAt: "2026-08-10T00:00:00Z" },
+      { id: "x2", title: "Staff Engineer", jobUrl: "https://jobs.ashbyhq.com/linear/x2", isRemote: null, location: null, descriptionHtml: "<p>Own it.</p>", publishedAt: null, applyUrl: null },
+    ] };
+    const out = await ashby.fetch("linear", {}, fakeHttp(payload));
+    expect(normalisedPosting.parse(out[0]).remote_hint).toBe(true);
+    const p2 = normalisedPosting.parse(out[1]);
+    expect(p2.remote_hint).toBeNull();
+    expect(p2.text).toContain("Own it.");
   });
   it("surfaces HTTP failures as errors (the runner logs them on the source)", async () => {
     await expect(greenhouse.fetch("nope", {}, fakeHttp({}, 404))).rejects.toThrow(/HTTP 404/);
